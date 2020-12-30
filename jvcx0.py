@@ -16,6 +16,8 @@
 # 2020-12-24 18:50:30: Got "b'!\x89\x01PMPM0C\n'"
 
 ##
+## Let's have some imports
+##
 
 import yaml
 import logging
@@ -26,13 +28,12 @@ import datetime
 import socket
 from logging.handlers import RotatingFileHandler
 
-serRxPort = '/dev/tty.usbserial-1420'
-
 ##
-##
+## Let's get started with code
 ##
 
 class X0State:
+    """THe main Apex state object that does the magic"""
 
     def __init__(self, inComm):
         self.desired = None
@@ -77,7 +78,8 @@ class X0State:
             log.debug(f'Inside state "{self.state}"')
 
             cmd = b'?\x89\x01PMPM\n'
-            log.info(f'Asking for picture state.  Sending REFERENCE command {cmd}')
+            log.info(f'Requesting current picture mode')
+            log.debug(f'Sending REFERENCE command {cmd}')
             self.comm.send(cmd)
 
             self.state = 'checkwaitack'
@@ -107,7 +109,6 @@ class X0State:
 
                         ##
                         ## maybe disconnect and reconnect here?
-
                         ##
 
             else:
@@ -119,7 +120,7 @@ class X0State:
                 l = len(exp)
                 if len(rxData) >= l and rxData[0:l] == exp:
                     # got the ack
-                    log.info(f'Got the Reference ACK')
+                    log.info(f'Got the Picture Mode reference ACK')
                     self.nextdata = rxData[l:]
                     log.debug(f'Set nextdata to {self.nextdata}')
                     self.state = 'checkwaitdata'
@@ -166,7 +167,7 @@ class X0State:
                         pjstate = rxData[5:7]
                         if pjstate == self.desired:
                             # already in this state
-                            log.info(f'@@@@@@@@ Already set to desired {self.desired}')
+                            log.info(f'**** Already set to desired picture mode {self.desired}')
                             self.state = ''
                             self.desired = None
 
@@ -176,12 +177,12 @@ class X0State:
 
                         else:
                             # start the command to change the state
-                            log.info(f'@@@@@@@@ NEED TO CHANGE STATE to desired {self.desired}')
+                            log.info(f'**** Attempting to change picture mode to {self.desired}')
 
                             # ex: "b'!\x89\x01PMPM0D\n'"
                             cmd = b'!\x89\x01PMPM'
                             cmd += self.desired + b'\n'
-                            log.info(f'Sending Operation command {cmd}')
+                            log.debug(f'Sending Operation command {cmd}')
                             self.opcmd = cmd
                             self.comm.send(cmd)
 
@@ -222,7 +223,7 @@ class X0State:
                     ##
                     ## SUCCESS!
                     ##
-                    log.info(f'@@@@@@@@ STATE HAS BEEN CHANGED TO {self.desired}')
+                    log.info(f'**** Picture Mode successfully changed to {self.desired}')
                     self.state = ''
                     self.desired = None
 
@@ -237,12 +238,12 @@ class X0State:
 
 
         else:
-            log.debug('*** YIKES {self.state}')
+            log.error('**** YIKES {self.state}')
        
 
     def set(self, inDesired):
         self.desired = inDesired
-        log.info(f'Desired state is {self.desired}')
+        log.info(f'Desired picture mode is now {self.desired}')
 
         ## getting this while waiting for results may be an indication
         ## that the JVC will NOT respond
@@ -254,6 +255,7 @@ class X0State:
 
 
 class X0CommTest:
+    """Simulated IP object for testing"""
 
     def __init__(self, mode):
         self.mode = mode
@@ -424,6 +426,7 @@ class X0CommTest:
 
 
 class X0IP:
+    """IP object for Apex"""
 
     def __init__(self, peer):
 
@@ -528,6 +531,7 @@ class X0IP:
 
 
 class X0Serial:
+    """Serial object for Apex"""
 
     def __init__(self, dev):
 
@@ -568,20 +572,26 @@ class X0Serial:
 
 
 def tstring():
+    """Return a time string"""
     now = datetime.datetime.now()
     ptime = now.strftime("%Y-%m-%d %H:%M:%S")
     return ptime    
 
 
 def jvcx0test():
+    """Test Cases"""
 
-    jvcip = X0IP(('192.168.10.202',20554))
+    with open('apex.yaml') as file:
+        cfg = yaml.full_load(file)
+
+    jvcip = X0IP((cfg['jvcip'],cfg['jvcport']))
     jvcip.connect()
 
-    vtxser = X0Serial(serRxPort)
+    vtxser = X0Serial(cfg['hdfury'])
     vtxser.connect()
 
     state = X0State(jvcip)
+
     state.set(b'02')
     x = 0
     while x < 100:
@@ -593,6 +603,7 @@ def jvcx0test():
 
 
 def jvcx0():
+    """Main Apex Loop"""
 
     with open('apex.yaml') as file:
         cfg = yaml.full_load(file)
@@ -605,23 +616,29 @@ def jvcx0():
     vtxser = X0Serial(cfg['hdfury'])
     vtxser.connect()
 
-#    state = X0State(testcomn)
     state = X0State(jvcip)
 
     while True:
-        state.action()
+        try:
+            state.action()
 
-        rxData = vtxser.read()
+            rxData = vtxser.read()
 
-        if rxData != b'':
-            # we got something
-            log.info(f'vtxser got "{rxData}"')
+            if rxData != b'':
+                # we got something
+                log.debug(f'HDFury said "{rxData}"')
 
-            example = b'!\x89\x01PMPM'
-            if len(rxData) >= len(example) and rxData[0:len(example)] == example:
-                state.set(rxData[7:9])
-            else:
-                log.error(f'Ignoring {rxData} {rxData[0:len(example)]} {example}')
+                example = b'!\x89\x01PMPM'
+                if len(rxData) >= len(example) and rxData[0:len(example)] == example:
+                    pm = rxData[7:9]
+                    log.info(f'HDFury said to activate picture mode {pm}')
+                    state.set(pm)
+                else:
+                    log.error(f'Ignoring {rxData} {rxData[0:len(example)]} {example}')
+
+        except Exception as ex:
+            log.error(f'Big Problem Exception {ex}')
+            time.sleep(10)
 
 ##
 ##
