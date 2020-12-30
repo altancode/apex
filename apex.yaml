@@ -1,0 +1,4 @@
+jvcip: '192.168.10.202'
+jvcport: 20554
+hdfury: '/dev/tty.usbserial-1420'
+  
