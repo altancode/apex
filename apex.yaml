@@ -1,4 +1,11 @@
 jvcip: '192.168.10.202'
 jvcport: 20554
-hdfury: '/dev/tty.usbserial-1420'
-  
+hdfury: '/dev/ttyUSB0'
+#hdfury: '/dev/tty.usbserial-1420'
+
+timeouts:
+  hdfuryRead: 0.25
+  jvcIP: 0.25
+  jvcRefAck: 0.25
+  jvcDefault: 2
+  jvcOpAck: 20
