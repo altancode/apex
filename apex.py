@@ -105,7 +105,11 @@ def apexMain():
     jvcip.connect()
 
     vtxser = x0serial.X0Serial(cfg['hdfury'], log, cfg['timeouts'])
-    vtxser.connect()
+    try:
+        vtxser.connect()
+    except Exception as ex:
+        log.error(f'Exception while accessing serial port ("{ex}"')
+        return
 
     state = x0state.X0State(jvcip, log, cfg['timeouts'])
 
