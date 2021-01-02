@@ -2,6 +2,7 @@
 ## imports
 ##
 
+import argparse
 import time
 import yaml
 import logging
@@ -70,6 +71,15 @@ def apexMain():
     log.addHandler(handler)
 
     log.info(f'Apex started...')
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--showserialports", "-ssp", help="List available serial ports")
+
+    args = parser.parse_args()
+
+    if args.showserialports:
+        x0serial.showSerialPorts()
+        return
 
     # read config
     with open('apex.yaml') as file:

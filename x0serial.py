@@ -3,10 +3,18 @@
 ##
 
 import serial
+import serial.tools.list_ports
 
 ##
 ## code
 ##
+
+def showSerialPorts():
+    ports = serial.tools.list_ports.comports()
+
+    for port, desc, hwid in sorted(ports):
+        print(f'{port} {desc} {hwid}')
+
 
 class X0Serial:
     """Serial connectivity to HDFury and builds up full lines of data """
