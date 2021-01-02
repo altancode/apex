@@ -70,19 +70,25 @@ def apexMain():
     handler.setLevel(logging.INFO)
     log.addHandler(handler)
 
-    log.info(f'Apex started...')
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--showserialports", "-ssp", help="List available serial ports")
+    parser.add_argument("--showserialports", "-ssp", action='store_true', help="List available serial ports")
+    parser.add_argument("--configfile", "-cf", help="Specify location of configuration file")
 
     args = parser.parse_args()
 
     if args.showserialports:
+        # show the serial ports and exit
         x0serial.showSerialPorts()
         return
 
+    cfgName = 'apex.yaml'
+    if args.configfile:
+        # user has specified a locaiton for the config file
+        cfgName = args.configfile
+        log.info(f'Using config located {cfgName}')
+
     # read config
-    with open('apex.yaml') as file:
+    with open(cfgName) as file:
         cfg = yaml.full_load(file)
 
     if not 'timeouts' in cfg:
@@ -92,6 +98,7 @@ def apexMain():
         cfg['timeouts']['jvcDefault'] = 2
         cfg['timeouts']['jvcOpAck'] = 20
 
+    log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
 
     jvcip = x0ip.X0IP((cfg['jvcip'],cfg['jvcport']), log, cfg['timeouts'])
