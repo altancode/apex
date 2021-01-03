@@ -12,6 +12,7 @@ import x0ip
 import x0serial
 import x0state
 import misc
+import x0passthrough
 
 ##
 ## globals
@@ -23,7 +24,7 @@ log = None
 ## code
 ##
 
-def processLoop(cfg, jvcip, vtxser, state):
+def processLoop(cfg, jvcip, vtxser, state, usePassthrough):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
     while True:
@@ -36,13 +37,18 @@ def processLoop(cfg, jvcip, vtxser, state):
                 # we got something
                 log.debug(f'HDFury said "{rxData}"')
 
-                example = b'!\x89\x01PMPM'
-                if len(rxData) >= len(example) and rxData[0:len(example)] == example:
-                    pm = rxData[7:9]
-                    log.info(f'HDFury said to activate picture mode {misc.getPictureMode(pm)} ({pm})')
-                    state.set(pm)
+                if usePassthrough:
+                    # just pass it on
+                    state.set(rxData)
                 else:
-                    log.error(f'Ignoring {rxData} {rxData[0:len(example)]} {example}')
+                    # only support picture mode for intelligent operation
+                    example = b'!\x89\x01PMPM'
+                    if len(rxData) >= len(example) and rxData[0:len(example)] == example:
+                        pm = rxData[7:9]
+                        log.info(f'HDFury said to activate picture mode {misc.getPictureMode(pm)} ({pm})')
+                        state.set(pm)
+                    else:
+                        log.error(f'Ignoring {rxData} {rxData[0:len(example)]} {example}')
 
         except Exception as ex:
             log.error(f'Big Problem Exception {ex}')
@@ -73,6 +79,7 @@ def apexMain():
     parser = argparse.ArgumentParser()
     parser.add_argument("--showserialports", "-ssp", action='store_true', help="List available serial ports")
     parser.add_argument("--configfile", "-cf", help="Specify location of configuration file")
+    parser.add_argument("--passthrough", "-pt", action='store_true', help="Operate in passthrough mode")
 
     args = parser.parse_args()
 
@@ -87,6 +94,10 @@ def apexMain():
         cfgName = args.configfile
         log.info(f'Using config located {cfgName}')
 
+    usePassthrough = False
+    if args.passthrough:
+        usePassthrough = True
+
     # read config
     with open(cfgName) as file:
         cfg = yaml.full_load(file)
@@ -100,6 +111,8 @@ def apexMain():
 
     log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
+    if usePassthrough:
+        log.info('Operating in passthrough mode')
 
     jvcip = x0ip.X0IP((cfg['jvcip'],cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
@@ -111,10 +124,13 @@ def apexMain():
         log.error(f'Exception while accessing serial port ("{ex}"')
         return
 
-    state = x0state.X0State(jvcip, log, cfg['timeouts'])
+    if not usePassthrough:
+        state = x0state.X0State(jvcip, log, cfg['timeouts'])
+    else:
+        state = x0passthrough.X0Passthrough(jvcip, log, cfg['timeouts'])
 
     # this never returns
-    processLoop(cfg, jvcip, vtxser, state)
+    processLoop(cfg, jvcip, vtxser, state, usePassthrough)
 
 
 if __name__ == "__main__":
