@@ -86,7 +86,7 @@ class X0State:
                         if self.checkwaitacktimeout > 40:
                             # we just give up
                             # projector powered off?
-                            log.info(f'Giving up... JVC powered off?')
+                            log.warning(f'Giving up... JVC powered off?')
                             self.desired = None
                             self.checkwaitacktimeout = 0
 
@@ -108,12 +108,11 @@ class X0State:
                         log.debug(f'Set nextdata to {self.nextdata}')
                         self.state = 'checkwaitdata'
                         self.timeout = time.time() + self.defaultOffset
-                        # jvcDefault
 
                     else:
                         # what happened?
                         log.debug(f'{l} {rxData[0:l]}')
-                        log.debug(f'Wanted {exp} but got {rxData}.  Starting over')
+                        log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
                         self.state = ''
 
         elif self.state == 'checkwaitdata':
@@ -136,11 +135,11 @@ class X0State:
 
             else:
                 # check if it's the stuff jvc sends when processing is taking a whike?
+                # this may not really be needed
                 if rxData == b'\x06\x89\x01PM\n':
                     # extend timeout
-                    log.debug(f'extending timeout...')
+                    log.warning(f'extending timeout...')
                     self.timeout = time.time() + self.defaultOffset
-                    # jvcDefault
 
                 else:
                     # we got something
@@ -223,7 +222,7 @@ class X0State:
 
                 else:
                     # what happened?
-                    log.debug(f'Wanted {exp} but got {rxData}.  Starting over')
+                    log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
                     self.state = ''
 
 
