@@ -63,9 +63,10 @@ class X0IP:
 
         except Exception as ex:
             self.log.debug(f'Exception from connect during send {ex}')
-            return b''
+            return False
 
         if not self.connected:
+            self.log.debug(f'Unpexged trying to send while not connected')
             return False
 
         try:
