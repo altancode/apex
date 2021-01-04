@@ -103,6 +103,7 @@ def apexMain():
         cfg = yaml.full_load(file)
 
     if not 'timeouts' in cfg:
+        cfg['timeouts'] = {}
         cfg['timeouts']['hdfuryRead'] = 0.25
         cfg['timeouts']['jvcIP'] = 0.25
         cfg['timeouts']['jvcRefAck'] = 0.25
