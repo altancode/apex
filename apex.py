@@ -60,7 +60,7 @@ def apexMain():
 
     global log
 
-    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s')
     formatter.default_msec_format = '%s.%03d'
     log = logging.getLogger("jvcx0")
     log.setLevel(logging.DEBUG)
@@ -103,11 +103,15 @@ def apexMain():
         cfg = yaml.full_load(file)
 
     if not 'timeouts' in cfg:
-        cfg['timeouts']['hdfuryRead'] = 0.25
+        cfg['timeouts'] = {}
+        cfg['timeouts']['hdfuryRead'] = 0.1
         cfg['timeouts']['jvcIP'] = 0.25
         cfg['timeouts']['jvcRefAck'] = 0.25
         cfg['timeouts']['jvcDefault'] = 2
         cfg['timeouts']['jvcOpAck'] = 20
+
+    if not 'closeOnComplete' in cfg:
+        cfg['closeOnComplete'] = False
 
     log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
@@ -125,9 +129,9 @@ def apexMain():
         return
 
     if not usePassthrough:
-        state = x0state.X0State(jvcip, log, cfg['timeouts'])
+        state = x0state.X0State(jvcip, log, cfg['timeouts'], cfg['closeOnComplete'])
     else:
-        state = x0passthrough.X0Passthrough(jvcip, log, cfg['timeouts'])
+        state = x0passthrough.X0Passthrough(jvcip, log, cfg['timeouts'], cfg['closeOnComplete'])
 
     # this never returns
     processLoop(cfg, jvcip, vtxser, state, usePassthrough)

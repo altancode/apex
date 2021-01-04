@@ -26,6 +26,7 @@ class X0IP:
 
         self.log.debug(f'Creating new socket')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.socket.settimeout(self.timeout)
         self.connected = False
 
@@ -34,10 +35,10 @@ class X0IP:
 
             # improve later
             temp = self.socket.recv(20)
-            self.log.debug(f'Temp is {temp}')
+            self.log.debug(f'JVC Sync1 is {temp}')
             self.socket.send(b'PJREQ')
             temp = self.socket.recv(20)
-            self.log.debug(f'Temp is {temp}')
+            self.log.debug(f'JVC Sync2 is {temp}')
 
             self.connected = True
         except Exception as ex:
@@ -66,7 +67,7 @@ class X0IP:
             return False
 
         if not self.connected:
-            self.log.debug(f'Unpexged trying to send while not connected')
+            self.log.debug(f'Unexpected trying to send while not connected')
             return False
 
         try:
