@@ -19,6 +19,7 @@ class X0IP:
         self.timeout = timeoutConfig['jvcIP']
         self.buffer = b''
         self.ignoreACK = b'\x06\x89\x01\x00\x00\n'
+        self.chatty = False
 
     def connect(self):
         self.log.debug(f'Inside connect with peer {self.peer}')
@@ -98,36 +99,43 @@ class X0IP:
         try:
             rxData = self.socket.recv(200)
             if rxData == b'':
-                self.log.debug('Socket read returned nothing')
+                if self.chatty:
+                    self.log.debug('Socket read returned nothing')
                 return b''
             else:
-                self.log.debug(f'Socket read returned {len(rxData)} bytes.   Buffer is {len(self.buffer)}')
+                if self.chatty:
+                    self.log.debug(f'Socket read returned {len(rxData)} bytes.   Buffer is {len(self.buffer)}')
 
                 self.buffer += rxData
                 
                 while True:
-                    self.log.debug(f'buffer is {self.buffer}')
+                    if self.chatty:
+                        self.log.debug(f'buffer is {self.buffer}')
 
                     first = self.buffer.find(b'\n')
                     if first > 0:
                         # we found it
                         r = self.buffer[0:first+1]
                         self.buffer = self.buffer[first+1:]
-                        self.log.debug(f'buffer reduced to {self.buffer}')
+                        if self.chatty:
+                            self.log.debug(f'buffer reduced to {self.buffer}')
 
                         if emptyIt:
                             # ignore r and loop again
-                            self.log.debug(f'Discarding {r}')
+                            if self.chatty:
+                                self.log.debug(f'Discarding {r}')
                             pass
 
                         elif r == self.ignoreACK:
                             # we always ignore this
-                            self.log.debug(f'Ignoring {r}')
+                            if self.chatty:
+                                self.log.debug(f'Ignoring {r}')
                             pass
 
                         else:
                             # ok to return it
-                            self.log.debug(f'returning {r}')
+                            if self.chatty:
+                                self.log.debug(f'returning {r}')
                             return r
     
                     else:
@@ -136,7 +144,8 @@ class X0IP:
                         return b''
 
         except socket.timeout:
- #           self.log.debug(f'Returning nothing because of timeout')
+            if self.chatty:
+                self.log.debug(f'Returning nothing because of timeout')
             return b''
 
         except Exception as ex:

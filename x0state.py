@@ -30,6 +30,7 @@ class X0State:
         self.closeOnComplete = closeOnComplete
         self.keepaliveOffset = 5
         self.nextKeepalive = time.time() + self.keepaliveOffset
+        self.chatty = False
 
 
     def action(self):
@@ -44,7 +45,8 @@ class X0State:
             if time.time() > self.nextKeepalive:
                 # it is!
                 cmd = b'!\x89\x01\x00\x00\n'
-                log.debug(f'Sending keep alive {cmd}')
+                if self.chatty:
+                    log.debug(f'Sending keep alive {cmd}')
                 ok = self.comm.send(cmd)
                 if not ok:
                     log.warning(f'Unable to send keep alive')
