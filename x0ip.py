@@ -17,6 +17,8 @@ class X0IP:
         self.socket = 0
         self.connected = False
         self.timeout = timeoutConfig['jvcIP']
+        self.buffer = b''
+        self.ignoreACK = b'\x06\x89\x01\x00\x00\n'
 
     def connect(self):
         self.log.debug(f'Inside connect with peer {self.peer}')
@@ -79,7 +81,7 @@ class X0IP:
 
             return False
 
-    def read(self):
+    def read(self, emptyIt = False):
         try:
             if not self.connected:
                 self.log.debug(f'read called but not connected')
@@ -94,17 +96,47 @@ class X0IP:
             return b''
 
         try:
-            rxData = self.socket.recv(20)
+            rxData = self.socket.recv(200)
             if rxData == b'':
                 self.log.debug('Socket read returned nothing')
                 return b''
             else:
-                self.log.debug(f'Socket read returned {len(rxData)} bytes')
-                # this is currently assuming all the JVC data will be in aisngle UDP frame
-                return rxData
+                self.log.debug(f'Socket read returned {len(rxData)} bytes.   Buffer is {len(self.buffer)}')
+
+                self.buffer += rxData
+                
+                while True:
+                    self.log.debug(f'buffer is {self.buffer}')
+
+                    first = self.buffer.find(b'\n')
+                    if first > 0:
+                        # we found it
+                        r = self.buffer[0:first+1]
+                        self.buffer = self.buffer[first+1:]
+                        self.log.debug(f'buffer reduced to {self.buffer}')
+
+                        if emptyIt:
+                            # ignore r and loop again
+                            self.log.debug(f'Discarding {r}')
+                            pass
+
+                        elif r == self.ignoreACK:
+                            # we always ignore this
+                            self.log.debug(f'Ignoring {r}')
+                            pass
+
+                        else:
+                            # ok to return it
+                            self.log.debug(f'returning {r}')
+                            return r
+    
+                    else:
+                        # didn't get a full line
+                        # nothing to return yet
+                        return b''
 
         except socket.timeout:
-            self.log.debug(f'Returning nothing because of timeout')
+ #           self.log.debug(f'Returning nothing because of timeout')
             return b''
 
         except Exception as ex:
