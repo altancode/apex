@@ -28,12 +28,29 @@ class X0State:
         self.checkwaitacktimeout = 0
         self.opcmd = b''
         self.closeOnComplete = closeOnComplete
+        self.keepaliveOffset = 5
+        self.nextKeepalive = time.time() + self.keepaliveOffset
+
 
     def action(self):
         # this is where the work happens
 #        log.debug(f'Action called in state "{self.state}" with desired {self.desired}')
 
         if self.desired == None:
+            # enoty stuff we don't want, such as stale responses or keep alive ack
+            self.comm.read(emptyIt = True)
+
+            # check if keepalive time
+            if time.time() > self.nextKeepalive:
+                # it is!
+                cmd = b'!\x89\x01\x00\x00\n'
+                log.debug(f'Sending keep alive {cmd}')
+                ok = self.comm.send(cmd)
+                if not ok:
+                    log.warning(f'Unable to send keep alive')
+        
+                self.nextKeepalive = time.time() + self.keepaliveOffset
+
             return
 
         # '' means nothing is going on
@@ -41,7 +58,6 @@ class X0State:
         # 'checkwaitdata' mean we received the ack but are now waiting for the actual data
         # 'setdataack' means we sent a command to change the state and are waiting the ack
 
-        # note: important to do read right away as it tells us if socket has been closed remotely
         if self.state == '':
             # no unexpected data coming from source so we start
             log.debug(f'Inside state "{self.state}"')
@@ -179,7 +195,7 @@ class X0State:
 
                     else:
                         # what happened?
-                        log.debug(f'Wanted {exp} but got {rxData}.  Starting over')
+                        log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
                         self.state = ''
 
         elif self.state == 'setdataack':
@@ -243,6 +259,7 @@ class X0State:
             ## that the JVC will NOT respond
             ## so let's try restarting our state machine
 #            self.comm.close()
-#            self.state = ''
 
+            # definitely need to restart the state machine
+            self.state = ''
             self.action()
