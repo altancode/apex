@@ -108,7 +108,7 @@ def apexMain():
         cfg['timeouts']['jvcIP'] = 0.25
         cfg['timeouts']['jvcRefAck'] = 0.25
         cfg['timeouts']['jvcDefault'] = 2
-        cfg['timeouts']['jvcOpAck'] = 20
+        cfg['timeouts']['jvcOpAck'] = 30
 
     if not 'closeOnComplete' in cfg:
         cfg['closeOnComplete'] = False
@@ -116,7 +116,7 @@ def apexMain():
     log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
     if usePassthrough:
-        log.info('Operating in passthrough mode')
+        log.info('Operating in EXPERIMENTAL passthrough mode')
 
     jvcip = x0ip.X0IP((cfg['jvcip'],cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
