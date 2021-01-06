@@ -24,7 +24,6 @@ class X0State:
         self.refAckOffset = timeoutConfig['jvcRefAck']
         self.defaultOffset = timeoutConfig['jvcDefault']
         self.opAckOffset = timeoutConfig['jvcOpAck']
-        self.nextdata = b''
         self.checkwaitacktimeout = 0
         self.opcmd = b''
         self.closeOnComplete = closeOnComplete
@@ -56,9 +55,9 @@ class X0State:
             return
 
         # '' means nothing is going on
-        # 'checkwaitack' means we have sent a Reference command and are waiting for the ack response
-        # 'checkwaitdata' mean we received the ack but are now waiting for the actual data
-        # 'setdataack' means we sent a command to change the state and are waiting the ack
+        # 'waitRefACK' means we have sent a Reference command and are waiting for the ack response
+        # 'waitRefData' mean we received the ack but are now waiting for the actual data
+        # 'waitOpACK' means we sent a command to change the state and are waiting the ack
 
         if self.state == '':
             # no unexpected data coming from source so we start
@@ -74,10 +73,10 @@ class X0State:
                 log.debug(f'Could not send refernece command')
             else:
                 # it was sent
-                self.state = 'checkwaitack'
+                self.state = 'waitRefACK'
                 self.timeout = time.time() + self.refAckOffset
         
-        elif self.state == 'checkwaitack':
+        elif self.state == 'waitRefACK':
             log.debug(f'Inside state "{self.state}"')
 
             # quick test of whether socket is connected
@@ -118,31 +117,22 @@ class X0State:
                     self.checkwaitacktimeout = 0
 
                     exp = b'\x06\x89\x01PM\x0A'
-                    l = len(exp)
-                    if len(rxData) >= l and rxData[0:l] == exp:
+                    if rxData == exp:
                         # got the ack
                         log.info(f'Got the Picture Mode reference ACK')
-                        self.nextdata = rxData[l:]
-                        log.debug(f'Set nextdata to {self.nextdata}')
-                        self.state = 'checkwaitdata'
+                        self.state = 'waitRefData'
                         self.timeout = time.time() + self.defaultOffset
 
                     else:
                         # what happened?
-                        log.debug(f'{l} {rxData[0:l]}')
-                        log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
-                        self.state = ''
+                        log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
+#                        self.state = ''
 
-        elif self.state == 'checkwaitdata':
+        elif self.state == 'waitRefData':
             log.debug(f'Inside state "{self.state}"')
 
             # see if there's a response
-            if self.nextdata == b'':
-                rxData = self.comm.read()
-            else:
-                log.debug(f'Using next data {self.nextdata}')
-                rxData = self.nextdata
-                self.nextdata = b''
+            rxData = self.comm.read()
 
             if rxData == b'':
                 # got nothing.  Have we timed out?
@@ -191,16 +181,16 @@ class X0State:
                             if not ok:
                                 log.warning(f'Send failed in {self.state}.   Consider optimisation')
 
-                            self.state = 'setdataack'
+                            self.state = 'waitOpACK'
                             self.timeout = time.time() + self.opAckOffset
 
 
                     else:
                         # what happened?
-                        log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
-                        self.state = ''
+                        log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
+#                        self.state = ''
 
-        elif self.state == 'setdataack':
+        elif self.state == 'waitOpACK':
             log.debug(f'Inside state "{self.state}"')
 
             # see if there's a response
@@ -240,8 +230,8 @@ class X0State:
 
                 else:
                     # what happened?
-                    log.warning(f'Wanted {exp} but got {rxData}.  Starting over')
-                    self.state = ''
+                    log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
+#                    self.state = ''
 
 
         else:
