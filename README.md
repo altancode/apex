@@ -33,7 +33,8 @@ You use an NVIDIA Shield as a media player and use different applications such a
   * Without Apex, Kodi displays its menu and the color intensity is all wrong for close to 20 seconds and then changes
   * With Apex, Kodi displays its menu and the HDR mode turns off almost immediately
 
-Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see
+Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see.  The non-Apex cases assume 
+an HDFury "delay" setting of 20 seconds.
 
 
 
@@ -48,8 +49,6 @@ Apex is written in Python 3.  There are a million ways to run python code.  Belo
 1. Install the requirements using "pip3 install -r requirements.txt"
 1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, change "jvcip" to be the IP of the JVC projector and change "hdfury" to be the serial device name of the HDFury device.
 1. Eventually you'll want to have Apex start automatically, but to get started you can simply use "python3 apex.py"
-
-It outputs basic info to stdout and more detailed info to x0.log
 
 HDFury Setup
 ==============
