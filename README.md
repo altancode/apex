@@ -1,6 +1,6 @@
 Apex
 ==============
-The initial version of Apex optimizes the JVC + HD Fury Macro experience.
+The initial version of Apex optimizes the JVC + HD Fury HDR experience.
 
 The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
 
