@@ -117,8 +117,8 @@ class X0IP:
                         # we found it
                         r = self.buffer[0:first+1]
                         self.buffer = self.buffer[first+1:]
-                        if self.chatty:
-                            self.log.debug(f'buffer reduced to {self.buffer}')
+                        if self.chatty or len(self.buffer) > 0:
+                            self.log.debug(f'buffer reduced to len:{len(self.buffer)} data:{self.buffer}')
 
                         if emptyIt:
                             # ignore r and loop again
