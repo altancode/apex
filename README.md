@@ -10,6 +10,35 @@ Apex works intelligently with the JVC and sends the macro command as soon as the
 
 Apex removes the need to connect a serial cable to the JVC because Apex communicates with the JVC using Internet Protocol.  The HDFury is now connected by serial to the device running Apex.
 
+Is Apex Right for Me?
+==============
+Apex may be right of you if...
+* You are currentlying using a JVC RS500/600 projector with an HDFury device to enable proper HDR (or plan to)?   
+* You current HDFury macros use JVC picture modes (USER1, USER3, NORMAL, Etc.)?
+* You prefer to use IP connectivity to your JVC projector rather than serial/RS232?
+* You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
+
+Example of where Apex offers significant value
+==============
+You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
+* Play HDR with Netflix
+  * Without Apex, when you start HDR content in Netflix, the HDR mode will not activate for about 20 seconds.
+  * With Apex, the HDR mode activates almost immediately
+
+* Play HDR with Kodi (w/frame rate matching set to "on start")
+  * Without Apex, when you start HDR content, the HDR mode will activate many seconds after the frame rate changes
+  * With Apex, the HDR mode activates almost immediately 
+
+* Stop HDR content from Kodi
+  * Without Apex, Kodi displays its menu and the color intensity is all wrong for close to 20 seconds and then changes
+  * With Apex, Kodi displays its menu and the HDR mode turns off almost immediately
+
+Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see
+
+
+
+
+
 Apex Setup
 ==============
 Apex is written in Python 3.  There are a million ways to run python code.  Below is one simple approach.  
