@@ -10,7 +10,7 @@
 class X0Passthrough:
     """THe main Apex state object that does the magic"""
 
-    def __init__(self, inComm, useLog,timeoutConfig):
+    def __init__(self, inComm, useLog,timeoutConfig, closeOnComplete):
 
         global log
         log = useLog

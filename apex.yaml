@@ -4,7 +4,7 @@ hdfury: '/dev/ttyUSB0'
 #hdfury: '/dev/tty.usbserial-1420'
 
 #timeouts:
-#  hdfuryRead: 0.25
+#  hdfuryRead: 0.1
 #  jvcIP: 0.25
 #  jvcRefAck: 0.25
 #  jvcDefault: 2
