@@ -63,6 +63,6 @@ If you don't know how the serial ports are named on the device running Apex, you
 
 Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passtrhough mode.  Note that this feature is experimental.
 
-# Discission?
+# Discussion?
 
 Want to discuss Apex?  Check out this [thread on AVSForum](https://www.avsforum.com/threads/apex-—-jvc-rs500-600-hdfury-hdr-macro-optimization.3177726/#post-60365429)
