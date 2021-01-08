@@ -34,7 +34,7 @@ You use an NVIDIA Shield as a media player and use different applications such a
   * With Apex, Kodi displays its menu and the HDR mode turns off almost immediately
 
 Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see.  The non-Apex cases assume 
-an HDFury "delay" setting of 20 seconds.
+a HDFury "delay" setting of 20 seconds.
 
 Apex Setup
 ==============
