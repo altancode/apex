@@ -13,9 +13,9 @@ Apex removes the need to connect a serial cable to the JVC because Apex communic
 Is Apex Right for Me?
 ==============
 Apex may be right of you if...
-* You are currentlying using a JVC RS500/600 projector with an HDFury device to enable proper HDR (or plan to)?   
-* You current HDFury macros use JVC picture modes (USER1, USER3, NORMAL, Etc.)?
-* You prefer to use IP connectivity to your JVC projector rather than serial/RS232?
+* You are currently using, or plan to use, a JVC RS500/600 projector with an HDFury device to enable proper HDR?   
+* Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
+* You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
 * You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
 
 Example of where Apex Offers Significant Value
@@ -35,10 +35,6 @@ You use an NVIDIA Shield as a media player and use different applications such a
 
 Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see.  The non-Apex cases assume 
 an HDFury "delay" setting of 20 seconds.
-
-
-
-
 
 Apex Setup
 ==============
