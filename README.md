@@ -18,7 +18,7 @@ Apex may be right of you if...
 * You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
 * You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
 
-# Example of where Apex Offers Significant Value
+# Example of Apex's Value
 
 You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
 * Play HDR with Netflix
