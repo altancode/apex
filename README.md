@@ -56,8 +56,6 @@ The HDFury requires the following configuration:
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "--showserialports" and it will output the potential serial ports
 
-Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "-passthrough" when launching Apex to enable passtrhough mode.
-=======
 1. Make sure the HDFury device's serial output is connected to the device running Apex.  If you use a serial extension cable, ensure it is a straight serial cable (NOT a NULL modem cable).  
 1. Set the Macro "Sync Delay (secs)" to be 1.  I wish it could be set to 0, but the HDFury does not work correctly when 0 is specified.
 1. Make sure the Macro "Send on every sync" is checked. 
@@ -68,3 +66,7 @@ Tips
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
 
 Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passtrhough mode.  Note that this feature is experimental.
+
+Discission?
+==============
+Want to discuss Apex?  Check out this [thread on AVSForum](https://www.avsforum.com/threads/apex-—-jvc-rs500-600-hdfury-hdr-macro-optimization.3177726/#post-60365429)
