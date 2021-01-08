@@ -48,7 +48,7 @@ Apex is written in Python 3.  There are a million ways to run python code.  Belo
 
 # HDFury Setup
 
-The HDFury requires the following configuration:
+The HDFury device, such as the Vertex 2, requires the following configuration:
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "--showserialports" and it will output the potential serial ports
 
