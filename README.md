@@ -61,7 +61,7 @@ If you don't know how the serial ports are named on the device running Apex, you
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
 
-Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passtrhough mode.  Note that this feature is experimental.
+Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passthough mode.  Note that this feature is experimental.
 
 # Discussion?
 
