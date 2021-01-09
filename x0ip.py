@@ -97,13 +97,22 @@ class X0IP:
             return b''
 
         try:
-            rxData = self.socket.recv(200)
-            if rxData == b'':
+            # don't do a socket read if we have a message buffered
+            haveit = (self.buffer.find(b'\n') >= 0)
+            if haveit:
+                self.log.debug(f'Using buffered data len={len(self.buffer)}, data={self.buffer}')
+
+            rxData = b''
+            if not haveit:
+                rxData = self.socket.recv(200)
+
+            if (not haveit) and (rxData == b''):
+                # no message in buffer and nothing received from network
                 if self.chatty:
                     self.log.debug('Socket read returned nothing')
                 return b''
             else:
-                if self.chatty:
+                if self.chatty and (not haveit):
                     self.log.debug(f'Socket read returned {len(rxData)} bytes.   Buffer is {len(self.buffer)}')
 
                 self.buffer += rxData
@@ -113,11 +122,16 @@ class X0IP:
                         self.log.debug(f'buffer is {self.buffer}')
 
                     first = self.buffer.find(b'\n')
-                    if first > 0:
+                    if first >= 0:
                         # we found it
+                        moreThanOne = self.buffer[first+1:].find(b'\n') >= 0
+                        if self.chatty or moreThanOne:
+                            self.log.debug(f'buffer is {len(self.buffer)} data:{self.buffer}')
+
                         r = self.buffer[0:first+1]
                         self.buffer = self.buffer[first+1:]
-                        if self.chatty or len(self.buffer) > 0:
+
+                        if self.chatty or moreThanOne:
                             self.log.debug(f'buffer reduced to len:{len(self.buffer)} data:{self.buffer}')
 
                         if emptyIt:
