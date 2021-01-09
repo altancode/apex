@@ -24,11 +24,16 @@ log = None
 ## code
 ##
 
-def processLoop(cfg, jvcip, vtxser, state, usePassthrough):
+def processLoop(cfg, jvcip, vtxser, state, usePassthrough, slowdown):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
     while True:
         try:
+
+            if slowdown > 0:
+                log.warning(f'Slowdown of {slowdown} enabled...')
+                time.sleep(slowdown)
+
             state.action()
 
             rxData = vtxser.read()
@@ -113,6 +118,9 @@ def apexMain():
     if not 'closeOnComplete' in cfg:
         cfg['closeOnComplete'] = False
 
+    if not 'slowdown' in cfg:
+        cfg['slowdown'] = 0
+
     log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
     if usePassthrough:
@@ -134,7 +142,7 @@ def apexMain():
         state = x0passthrough.X0Passthrough(jvcip, log, cfg['timeouts'], cfg['closeOnComplete'])
 
     # this never returns
-    processLoop(cfg, jvcip, vtxser, state, usePassthrough)
+    processLoop(cfg, jvcip, vtxser, state, usePassthrough, cfg['slowdown'])
 
 
 if __name__ == "__main__":
