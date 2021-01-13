@@ -70,11 +70,6 @@ def apexMain():
     log = logging.getLogger("jvcx0")
     log.setLevel(logging.DEBUG)
 
-    # for files
-    handler = RotatingFileHandler('./apex.log', maxBytes=500*1024, backupCount=5)
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-
     # for stderr
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
@@ -85,8 +80,21 @@ def apexMain():
     parser.add_argument("--showserialports", "-ssp", action='store_true', help="List available serial ports")
     parser.add_argument("--configfile", "-cf", help="Specify location of configuration file")
     parser.add_argument("--passthrough", "-pt", action='store_true', help="Operate in passthrough mode")
+    parser.add_argument("--logfile", "-lf", help="Specify log file location")
 
     args = parser.parse_args()
+
+    logFile = './apex.log'
+    if args.logfile:
+        # user has specified a locaiton for the logging
+        logFile = args.logfile
+
+    # now that we have the log file name, we setup file logging
+    handler = RotatingFileHandler(logFile, maxBytes=500*1024, backupCount=5)
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+
+    log.info(f'Using log file {logFile}')
 
     if args.showserialports:
         # show the serial ports and exit
@@ -97,7 +105,7 @@ def apexMain():
     if args.configfile:
         # user has specified a locaiton for the config file
         cfgName = args.configfile
-        log.info(f'Using config located {cfgName}')
+    log.info(f'Using config located {cfgName}')
 
     usePassthrough = False
     if args.passthrough:

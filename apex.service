@@ -1,0 +1,14 @@
+[Unit]
+Description=Apex service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/apex/apex.py --configfile /home/pi/apex/apex.yaml --logfile /home/pi/apex/apex.log
+
+[Install]
+WantedBy=multi-user.target
