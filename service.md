@@ -22,6 +22,10 @@ Reboot your linux machine and type
 
 sudoo systemctl status apex
 
+Does it include text similar to
+
+Active: active (running) since Wed 2021-01-13 13:50:01 EST; 16min ago
+
 Also look at the log and verify it has entries matches the current time.   For example,
 
 tail -n 50 -F /home/pi/apex/apex.log
