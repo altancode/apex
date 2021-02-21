@@ -88,11 +88,32 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,(cmd,b)))
 
+            elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('numeric')) == int:
+                log.debug(f'inside number with {op}')
+                cmd = op.get('cmd')
+                num = op.get('numeric')
+
+                if -0x8000 <= num <= 0x7FFF:
+                    if num < 0:
+                        num = 0x10000 + num
+
+                    b = None
+                    try:
+                        b = bytes('{:04X}'.format(num & 0xffff), 'utf-8')
+                    except Exception as ex:
+                        log.error(f'Cannot convert data to binary {num} {ex}')
+
+                    if b:
+                        log.debug(f'profile result {cmd} {b}')
+                        obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
+                        localQueue.append(ApexTaskEntry(obj,(cmd,b)))
+
             else:
                 log.warning(f'Cannot parse {op}')
     else:
         log.warning(f'Ignoring Unknown profile {pname}')
 
+    log.debug(f'localqueue {localQueue}')
     return localQueue
 
 

@@ -15,7 +15,7 @@ keydevice: '/dev/input/event0'
 
 keymap:
   KEY_MENU: 
-    profile: profile1
+    profile: profile2
   KEY_1: 
     profile: profile9
   KEY_2: 
@@ -84,7 +84,11 @@ profiles:
   - op: rccode
     data: '7302'
   profile2:
-  - op: do
-    data: '12'
-  - op: do
-    data: '23'
+  - op: raw
+    cmd: PMLA
+    numeric: -2
+
+  # - op: raw
+  #   cmd: PMCN
+  #   numeric: -11
+  
