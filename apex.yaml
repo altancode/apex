@@ -1,6 +1,8 @@
 jvcip: '192.168.10.202'
 jvcport: 20554
 hdfury: '/dev/ttyUSB0'
+netcontrolport: 12345
+keydevice: '/dev/input/event0'
 #hdfury: '/dev/tty.usbserial-1420'
 #slowdown: 2
 
@@ -10,3 +12,79 @@ hdfury: '/dev/ttyUSB0'
 #  jvcRefAck: 0.25
 #  jvcDefault: 2
 #  jvcOpAck: 20
+
+keymap:
+  KEY_MENU: 
+    profile: profile1
+  KEY_1: 
+    profile: profile9
+  KEY_2: 
+    profile: profile8
+
+profiles:
+  _APEX_PMFilm:
+  - op: apexpm
+    data: '00'
+
+  _APEX_PMCinema:
+  - op: apexpm
+    data: '01'
+
+  _APEX_PMAnimation:
+  - op: apexpm
+    data: '02'
+
+  _APEX_PMNatural:
+  - op: apexpm
+    data: '03'
+
+  _APEX_PMTHX:
+  - op: apexpm
+    data: '06'
+
+  _APEX_PMUser1:
+  - op: apexpm
+    data: '0C'
+
+  _APEX_PMUser2:
+  - op: apexpm
+    data: '0D'
+#  - op: rccode
+#    data: '37 33 32 45'
+#  - op: rccode
+#    data: '37 33 30 31'
+  
+  _APEX_PMUser3:
+  - op: apexpm
+    data: '0E'
+
+  _APEX_PMUser4:
+  - op: apexpm
+    data: '0F'
+
+  _APEX_PMUser5:
+  - op: apexpm
+    data: '10'
+
+  _APEX_PMUser6:
+  - op: apexpm
+    data: '11'
+
+    
+
+
+  profile1:
+  - op: raw
+    cmd: IP
+    data: '7'
+  - op: rccode
+    data: '732E'
+  - op: rccode
+    data: '7301'
+  - op: rccode
+    data: '7302'
+  profile2:
+  - op: do
+    data: '12'
+  - op: do
+    data: '23'
