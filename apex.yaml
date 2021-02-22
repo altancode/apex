@@ -216,6 +216,50 @@ profiles:
     cmd: ISMA
     data: '2'
 
+  # Picture Mode Film
+  - op: apexpm
+    data: '00'
+
+  # Picture Mode Cinema
+  - op: apexpm
+    data: '01'
+
+  # Picture Mode Animation
+  - op: apexpm
+    data: '02'
+
+  # Picture Mode Natural
+  - op: apexpm
+    data: '03'
+
+  # Picture Mode THX
+  - op: apexpm
+    data: '06'
+
+  # Picture Mode User1
+  - op: apexpm
+    data: '0C'
+
+  # Picture Mode User2
+  - op: apexpm
+    data: '0D'
+  
+  # Picture Mode User3
+  - op: apexpm
+    data: '0E'
+
+  # Picture Mode User4
+  - op: apexpm
+    data: '0F'
+
+  # Picture Mode User5
+  - op: apexpm
+    data: '10'
+
+  # Picture Mode User6
+  - op: apexpm
+    data: '11'
+
 
 #
 # User Profiles are below
