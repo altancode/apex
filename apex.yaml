@@ -15,12 +15,14 @@ keydevice: '/dev/input/event0'
 #  jvcOpAck: 20
 
 keymap:
-  # KEY_MENU: 
-  #   profile: profile2
-  # KEY_1: 
-  #   profile: profile9
-  # KEY_2: 
-  #   profile: profile8
+  KEY_F1: 
+    profile: profilePowerOn
+  KEY_F2: 
+    profile: profilePowerOff
+  KEY_1: 
+    profile: profileHDMI1
+  KEY_2: 
+    profile: profileHDMI2
 
 profiles:
 #
@@ -106,7 +108,7 @@ profiles:
     cmd: PMCN
     numeric: 0
 
-  # Brightness to value zero (change number parameter for other values)
+  # Brightness to value zero (change numeric parameter for other values)
   - op: raw
     cmd: PMBR
     numeric: 0
@@ -126,7 +128,7 @@ profiles:
     cmd: PMDI
     data: '2'
 
-  # Aperture to 0 (cannot be in auto mode when performed)
+  # Aperture to 0 (change numeric parameter for other values, cannot be in auto mode when performed)
   - op: raw
     cmd: PMLA
     numeric: 0
@@ -266,6 +268,29 @@ profiles:
 # These can have any name and perform any steps you want
 # The content below are poor examples
 #
+
+  profilePowerOn:
+  - op: raw 
+    cmd: PW
+    data: '1'
+
+  profilePowerOff:
+  # Power Off
+  - op: raw 
+    cmd: PW
+    data: '0'
+
+  profileHDMI1:
+  # HDMI1
+  - op: raw
+    cmd: IP
+    data: '6'
+
+  profileHDMI2:
+  # HDMI2
+  - op: raw
+    cmd: IP
+    data: '7'
 
   profileTest1:
   - op: raw

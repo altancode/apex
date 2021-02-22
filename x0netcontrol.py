@@ -11,6 +11,7 @@ import json
 ##
 
 class x0NetControl:
+    """Receive commands from the network"""
 
     def __init__(self, useLog, port):
         self.port = port

@@ -10,7 +10,7 @@ import misc
 ##
 
 class X0State:
-    """THe main Apex state object that does the magic"""
+    """The main Apex state object that does the magic"""
 
     def __init__(self, inComm, useLog,timeoutConfig, closeOnComplete):
 

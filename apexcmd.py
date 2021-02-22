@@ -4,7 +4,6 @@
 
 import argparse
 import socket
-import select
 import json
 import logging
 
@@ -16,7 +15,6 @@ def apexCmdMain():
     """"Send a NetCmd to Apex"""
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--showserialports", "-ssp", action='store_true', help="List available serial ports")
     parser.add_argument("--rccode", "-rcc", help="Specify remote control code to perform")
     parser.add_argument("--profile", "-pf", help="Specify profile to activate")
     parser.add_argument("--port", "-p", help="Specify port")

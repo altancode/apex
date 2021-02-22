@@ -19,10 +19,11 @@ import x0keys
 import traceback
 
 ##
-##
+## Classes
 ##
 
 class ApexTaskEntry():
+    """Class to hold values"""
 
     def __init__(self, who, what):
         self.who = who
@@ -42,6 +43,7 @@ log = None
 ##
 
 def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
+    """takes a profile name and queues the associated commands"""
 
     localQueue = []
 
@@ -113,12 +115,12 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
     else:
         log.warning(f'Ignoring Unknown profile {pname}')
 
-    log.debug(f'localqueue {localQueue}')
+    log.debug(f'New operations {localQueue}')
     return localQueue
 
 
 def profile2cmd(indata, profiles, jvcip, log, cfg, stateHDR):
-
+    """takes an array of dictionaries each containing a profilename and queues the associated commands"""
     localQueue = []
 
     for r in indata:
@@ -129,17 +131,13 @@ def profile2cmd(indata, profiles, jvcip, log, cfg, stateHDR):
     return localQueue
 
 
-
-
 def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
-
-    testOnetime = False
 
     taskQueue = []
     currentState = None
 
-    chatty = True
+    chatty = False
     keepaliveOffset = 10
     nextKeepalive = time.time() + keepaliveOffset
 
@@ -167,9 +165,6 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                     next = taskQueue.pop(0)
                     currentState = next.who
 
-                    ##
-                    ## need to init the who class
-                    ##
                     log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
                     next.who.set(next.what[0],next.what[1])
 
@@ -211,7 +206,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                             taskQueue = taskQueue + singleProfile2cmd(profileName, profiles, jvcip, log, cfg, stateHDR)
 
                     else:
-                        log.error(f'Ignoring {rxData} {rxData[0:len(example)]} {example}')
+                        log.error(f'Ignoring HDFury {rxData} {rxData[0:len(example)]} {example}')
 
             if netcontrol:
                 results = netcontrol.action()
@@ -230,17 +225,6 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 if len(results) > 0:
                     log.debug(f'keyinput results {results}')
                     taskQueue = taskQueue + profile2cmd(results, profiles, jvcip, log, cfg, stateHDR)
-
-            if testOnetime:
-                testOnetime = False
-                # obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                # taskQueue.append(ApexTaskEntry(obj,('RC',b'\x37\x33\x32\x45')))
-                obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                taskQueue.append(ApexTaskEntry(obj,('IP',b'\x37\x33\x32\x45')))
-                obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                taskQueue.append(ApexTaskEntry(obj,('RC',b'\x37\x33\x33\x34')))
-                obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                taskQueue.append(ApexTaskEntry(obj,('RC',b'\x37\x33\x33\x34')))
 
         except Exception as ex:
             log.error(f'Big Problem Exception {ex}')
@@ -308,6 +292,7 @@ def apexMain():
         cfg['timeouts']['jvcRefAck'] = 0.25
         cfg['timeouts']['jvcDefault'] = 2
         cfg['timeouts']['jvcOpAck'] = 30
+        cfg['timeouts']['jvcOpAckProfile'] = 60
 
     if not 'closeOnComplete' in cfg:
         cfg['closeOnComplete'] = False
@@ -344,7 +329,6 @@ def apexMain():
     if 'keydevice' in cfg:
         keyinput = x0keys.x0Keys(log, cfg['keydevice'], cfg['keymap'])
 
-    
     # this never returns
     processLoop(cfg, jvcip, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], cfg['netcontrolsecret'])
 

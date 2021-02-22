@@ -1,4 +1,16 @@
 ##
+## notes
+##
+## https://python-evdev.readthedocs.io/en/latest/tutorial.html
+##
+
+## Display IR codes visible
+## sudo ir-keytable -c -p all -t
+
+## Tell Linux to use the rs500.toml mappings
+## sudo ir-keytable -c -w rs500.toml
+
+##
 ## imports
 ##
 
@@ -17,6 +29,7 @@ except ImportError:
 ##
 
 class x0Keys:
+    """Receive commands from IR Remotes"""
 
     def __init__(self, useLog, inputDevice, inkeymap):
         if not haveEvdev:
@@ -26,7 +39,7 @@ class x0Keys:
         self.log.info(f'Starting up IR Keys... {inputDevice}')
         self.device = InputDevice(inputDevice)
 
-        print(inkeymap)
+        #self.log.debug(f'Using keyamp {inkeymap}')
 
         mapping = {}
         # work on the mappings
@@ -39,7 +52,7 @@ class x0Keys:
                     self.log.error(f'Unable ot map {key} {ex}')
 
         self.mapping = mapping
-        self.log.debug(f'Mapping {self.mapping}')
+        self.log.debug(f'Key Mapping {self.mapping}')
 
 
     def action(self):

@@ -21,14 +21,8 @@ class X0OpCmd:
         self.comm = inComm
         self.state = ''
         self.timeout = 0
-        self.refAckOffset = timeoutConfig['jvcRefAck']
-        self.defaultOffset = timeoutConfig['jvcDefault']
-        self.opAckOffset = timeoutConfig['jvcOpAck']
-        self.checkwaitacktimeout = 0
+        self.opAckOffset = timeoutConfig['jvcOpAckProfile']
         self.opcmd = b''
-        self.keepaliveOffset = 5
-        self.nextKeepalive = time.time() + self.keepaliveOffset
-        self.chatty = False
 
 
     def action(self):
@@ -40,8 +34,6 @@ class X0OpCmd:
             return True
 
         # '' means nothing is going on
-        # 'waitRefACK' means we have sent a Reference command and are waiting for the ack response
-        # 'waitRefData' mean we received the ack but are now waiting for the actual data
         # 'waitOpACK' means we sent a command to change the state and are waiting the ack
 
         if self.state == '':
