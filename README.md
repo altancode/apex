@@ -85,6 +85,8 @@ Apex is written in Python 3.  There are a million ways to run python code.  Belo
 1. Retrieve Apex from the Repo
 1. Install the requirements using "pip3 install -r requirements.txt"
 1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, change "jvcip" to be the IP of the JVC projector and change "hdfury" to be the serial device name of the HDFury device.
+1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex is listen on for external commands.  Also change 
+"netcontrolsecret" to a secret value for your specific setup.
 1. Eventually you'll want to have Apex start automatically, but to get started you can simply use "python3 apex.py"
 
 # HDFury Setup
@@ -97,6 +99,72 @@ If you don't know how the serial ports are named on the device running Apex, you
 1. Set the Macro "Sync Delay (secs)" to be 1.  I wish it could be set to 0, but the HDFury does not work correctly when 0 is specified.
 1. Make sure the Macro "Send on every sync" is checked. 
 1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device is save the new settings.
+
+# Profile Details
+
+Profiles are stored in the apex.yaml file.  All profiles, whether custom or core, exist under the "profiles" entry.  Below is an example.
+
+```
+profiles:
+# Apex Core Profiles
+# Profile names beginning with _APEX_ have specific meaning and should not be removed
+# However, you are more than welcone to change the contents of the profile
+
+  _APEX_PMFilm:
+  - op: apexpm
+    data: '00'
+
+  _APEX_PMCinema:
+  - op: apexpm
+    data: '01'
+```
+
+All profiles follow a standard format.  First there is the profile name.   This is followed by an operation ("op") which is followed by a
+couple of different parameters.
+
+## Profile Operations
+
+The following operations are supported
+
+* apexpm.  This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
+should use apexpm instead of alternative methods.   When using apexpm, a "data" field must exist.  This indicates which picture mode
+to activate.   
+
+* raw.  The raw operatiobn mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
+a numeric field.   Either one can be used, the two options exist to make your life easier.  If numeric is specified, Apex takes the
+specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
+data to be specified.
+
+Here is an example of a raw command with numberic
+
+```
+  # set the aperture to -10
+  - op: raw
+    cmd: PMLA
+    numeric: -10
+```
+
+Here is an example of a raw command with data
+
+```
+  # Gamma Custom 2
+  - op: raw
+    cmd: PMGT
+    data: '5'
+```
+
+* rccode.  This standards for remote control code.  This operation allows buttons from the remote to be simulated.  Using rccode is
+not recommended because the JVC control protocol treats these exactly like IR commands, which means they might be missed or
+ignored.  The rccode operation is included only for completeness.   
+
+Here is an example rccode that displays (or removes) the "Menu"
+
+```
+  # RC code for Menu
+  - op: rccode
+    data: '732E'
+```
+
 
 # Tips
 
