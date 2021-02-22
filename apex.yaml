@@ -74,12 +74,156 @@ profiles:
     data: '11'
 
 #
+# Sample Profile with potentially useful commands
+# Do not activate this profile or else it is going to run a ton of commands
+# you certainly do not want
+# Rather, use these commands in your own profiles!
+#
+
+  sampleProfile_DoNotActivate:
+  # Power On
+  - op: raw 
+    cmd: PW
+    data: '1'
+    
+  # Power Off
+  - op: raw 
+    cmd: PW
+    data: '0'
+
+  # HDMI1
+  - op: raw
+    cmd: IP
+    data: '6'
+
+  # HDMI2
+  - op: raw
+    cmd: IP
+    data: '7'
+
+  # Contrast to value zero (change numeric parameter for other values)
+  - op: raw
+    cmd: PMCN
+    numeric: 0
+
+  # Brightness to value zero (change number parameter for other values)
+  - op: raw
+    cmd: PMBR
+    numeric: 0
+
+  # Intelligent Lens Aperture (Dynamic Iris) Off
+  - op: raw
+    cmd: PMDI
+    data: '0'
+
+  # Intelligent Lens Aperture (Dynamic Iris) Auto1
+  - op: raw
+    cmd: PMDI
+    data: '1'
+
+  # Intelligent Lens Aperture (Dynamic Iris) Auto2
+  - op: raw
+    cmd: PMDI
+    data: '2'
+
+  # Aperture to 0 (cannot be in auto mode when performed)
+  - op: raw
+    cmd: PMLA
+    numeric: 0
+
+  # Lamp Power Normal
+  - op: raw
+    cmd: PMLP
+    data: '0'
+
+  # Lamp Power High
+  - op: raw
+    cmd: PMLP
+    data: '1'
+
+  # Load Lens Memory 1 (for other memory, chance data to be slot minus 1)
+  - op: raw
+    cmd: INML
+    data: '0'
+
+  # Gamma Normal
+  - op: raw
+    cmd: PMGT
+    data: '0'
+
+  # Gamma A
+  - op: raw
+    cmd: PMGT
+    data: '1'
+
+  # Gamma B
+  - op: raw
+    cmd: PMGT
+    data: '2'
+
+  # Gamma C
+  - op: raw
+    cmd: PMGT
+    data: '3'
+
+  # Gamma Custom 1
+  - op: raw
+    cmd: PMGT
+    data: '4'
+
+  # Gamma Custom 2
+  - op: raw
+    cmd: PMGT
+    data: '5'
+
+  # Gamma Custom 3
+  - op: raw
+    cmd: PMGT
+    data: '6'
+
+  # Gamma D
+  - op: raw
+    cmd: PMGT
+    data: '7'
+
+  # Gamma Film1
+  - op: raw
+    cmd: PMGT
+    data: 'A'
+
+  # Gamma Film2
+  - op: raw
+    cmd: PMGT
+    data: 'B'
+
+  # Mask Switch Custom 1
+  - op: raw
+    cmd: ISMA
+    data: '0'
+
+  # Mask Switch Custom 2
+  - op: raw
+    cmd: ISMA
+    data: '1'
+
+  # Mask Switch Custom 3
+  - op: raw
+    cmd: ISMA
+    data: '3'
+
+  # Mask Switch Off
+  - op: raw
+    cmd: ISMA
+    data: '2'
+
+
+#
 # User Profiles are below
 # These can have any name and perform any steps you want
 # The content below are poor examples
 #
 
-  profile1:
+  profileTest1:
   - op: raw
     cmd: IP
     data: '7'
@@ -90,17 +234,17 @@ profiles:
   - op: rccode
     data: '7302'
     
-  profile2:
+  profile2Test:
   - op: raw
     cmd: PMLA
     numeric: -2
 
-  profile3:
+  profile3Test:
   - op: raw
     cmd: PMCN
     numeric: -11
-    
-  profile4:
+
+  profile4Test:
   - op: raw
     cmd: PMCN
     numeric: 0
