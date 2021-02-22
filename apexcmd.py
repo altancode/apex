@@ -21,6 +21,7 @@ def apexCmdMain():
     parser.add_argument("--profile", "-pf", help="Specify profile to activate")
     parser.add_argument("--port", "-p", help="Specify port")
     parser.add_argument("--ip", "-ip", help="Specify IP address")
+    parser.add_argument("--secret", "-s", help="Specify secret")
 
     args = parser.parse_args()
 
@@ -30,7 +31,11 @@ def apexCmdMain():
 
     if not args.port:
         print('Must supply a Port')
+        return
 
+    if not args.secret:
+        print('Must specify a secret')
+        return
 
     print('Creating socket...')
 
@@ -43,6 +48,7 @@ def apexCmdMain():
 
         if args.rccode:
             msg = {}
+            msg['secret'] = args.secret
             msg['rccode'] = args.rccode
             js = json.dumps(msg)
             print(js)
@@ -50,6 +56,7 @@ def apexCmdMain():
 
         if args.profile:
             msg = {}
+            msg['secret'] = args.secret
             msg['profile'] = args.profile
             js = json.dumps(msg)
             print(js)

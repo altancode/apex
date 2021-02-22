@@ -2,6 +2,7 @@ jvcip: '192.168.10.202'
 jvcport: 20554
 hdfury: '/dev/ttyUSB0'
 netcontrolport: 12345
+netcontrolsecret: 'secret'
 keydevice: '/dev/input/event0'
 #hdfury: '/dev/tty.usbserial-1420'
 #slowdown: 2
@@ -14,14 +15,20 @@ keydevice: '/dev/input/event0'
 #  jvcOpAck: 20
 
 keymap:
-  KEY_MENU: 
-    profile: profile2
-  KEY_1: 
-    profile: profile9
-  KEY_2: 
-    profile: profile8
+  # KEY_MENU: 
+  #   profile: profile2
+  # KEY_1: 
+  #   profile: profile9
+  # KEY_2: 
+  #   profile: profile8
 
 profiles:
+#
+# Apex Core Profiles
+# Profile names beginning with _APEX_ have specific meaning and should not be removed
+# However, you are more than welcone to change the contents of the profile
+# Although you probably only want to add steps after the initial apexpm operation 
+#
   _APEX_PMFilm:
   - op: apexpm
     data: '00'
@@ -49,10 +56,6 @@ profiles:
   _APEX_PMUser2:
   - op: apexpm
     data: '0D'
-#  - op: rccode
-#    data: '37 33 32 45'
-#  - op: rccode
-#    data: '37 33 30 31'
   
   _APEX_PMUser3:
   - op: apexpm
@@ -70,8 +73,11 @@ profiles:
   - op: apexpm
     data: '11'
 
-    
-
+#
+# User Profiles are below
+# These can have any name and perform any steps you want
+# The content below are poor examples
+#
 
   profile1:
   - op: raw
@@ -83,12 +89,19 @@ profiles:
     data: '7301'
   - op: rccode
     data: '7302'
+    
   profile2:
   - op: raw
     cmd: PMLA
     numeric: -2
 
-  # - op: raw
-  #   cmd: PMCN
-  #   numeric: -11
+  profile3:
+  - op: raw
+    cmd: PMCN
+    numeric: -11
+    
+  profile4:
+  - op: raw
+    cmd: PMCN
+    numeric: 0
   

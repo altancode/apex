@@ -30,12 +30,13 @@ class x0Keys:
 
         mapping = {}
         # work on the mappings
-        for key in inkeymap.keys():
-            try:
-                code = eval('ecodes.' + key)
-                mapping[code] = inkeymap[key]
-            except Exception as ex:
-                self.log.error(f'Unable ot map {key} {ex}')
+        if inkeymap:
+            for key in inkeymap.keys():
+                try:
+                    code = eval('ecodes.' + key)
+                    mapping[code] = inkeymap[key]
+                except Exception as ex:
+                    self.log.error(f'Unable ot map {key} {ex}')
 
         self.mapping = mapping
         self.log.debug(f'Mapping {self.mapping}')

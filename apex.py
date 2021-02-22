@@ -131,7 +131,7 @@ def profile2cmd(indata, profiles, jvcip, log, cfg, stateHDR):
 
 
 
-def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles):
+def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
     testOnetime = False
@@ -217,7 +217,13 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 results = netcontrol.action()
                 if len(results) > 0:
                     log.debug(f'Netcontrol results {results}')
-                    taskQueue = taskQueue + profile2cmd(results, profiles, jvcip, log, cfg, stateHDR)
+                    verified = []
+                    for r in results:
+                        if r.get('secret') == secret:
+                            verified.append(r)
+                        else:
+                            log.warning(f'Secret did not match in request for profile {r}')
+                    taskQueue = taskQueue + profile2cmd(verified, profiles, jvcip, log, cfg, stateHDR)
 
             if keyinput:
                 results = keyinput.action()
@@ -312,6 +318,9 @@ def apexMain():
     if not 'netcontrolport' in cfg:
         cfg['netcontrolport'] = 0
 
+    if not 'netcontrolsecret' in cfg:
+        cfg['netcontrolsecret'] = 'secret'
+
     log.info(f'Apex started...')
     log.info(f'Using config {cfg}')
 
@@ -337,7 +346,7 @@ def apexMain():
 
     
     # this never returns
-    processLoop(cfg, jvcip, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'])
+    processLoop(cfg, jvcip, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], cfg['netcontrolsecret'])
 
 
 if __name__ == "__main__":
