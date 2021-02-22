@@ -292,6 +292,11 @@ profiles:
     cmd: IP
     data: '7'
 
+  profileMenuButton:
+  # RC code for Menu
+  - op: rccode
+    data: '732E'
+
   profileTest1:
   - op: raw
     cmd: IP

@@ -1,6 +1,11 @@
 # Apex
 
-The initial version of Apex optimizes the JVC + HD Fury HDR experience.
+Apex is a powerful tool to control your JVC projector.   Apex offers several features.
+
+1. Apex optimizes the JVC + HD Fury HDR experience.
+2. Apex allows deep control of the JVC using both network connectivity and IR
+
+# Apex HDR Experience Optimization
 
 The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
 
@@ -10,6 +15,39 @@ Apex works intelligently with the JVC and sends the macro command as soon as the
 
 Apex removes the need to connect a serial cable to the JVC because Apex communicates with the JVC using Internet Protocol.  The HDFury is now connected by serial to the device running Apex.
 
+# Apex Deep Control
+
+Apex allows commands from JVC's "External Control Command Communicaiton Specification" to be performed by network commands or IR keypresses.
+Unlike using the projector's IR remote, or an automation solution like Harmony, Apex verifies that commands are actually performed.  With
+Apex, for example, you don't need to hard code length (40 second?) delays because the JVC is switching inputs or is powering on.   Apex will
+make sure the command is performed when the JVC is paying attention.
+
+Deep control allows the following types of settings to be adjusted
+
+* Lens Menory
+* Aperture
+* Contrast
+* Brightness
+* Gamma table
+* Mask
+* Lamp Power
+* Etc.
+
+# Apex Profiles
+
+Everything (almost) in Apex is a profile.   A profile is a named collection of JVC control commands.  A profile can have 1 command or many commands.
+Place whatever commands are needed to configure your JVC for your specific situation.  For example, you could createa a profile called 
+"cinemascope" which activates the appropriate picture mode, lens zoom, lens aperture and mask settings.  You can be confident that all the commands
+in your profile will be performed.
+
+In addition to custom profiles, Apex has several "core" profiles that are used with the HDR + HDFury integraton.   When the HD Fury devices
+tells Apex (via serial) to activate a specific picture mode, Apex activates a core profile named similar to the picture mode.  For example,
+if HD Fury says to activate picture mode User 2 then Apex will enable profile "_APEX_PMUser2".  The default setting for profile "_APEX_PMUser2"
+is to use the Apex Optimized Picture Mode algorithm for User 2.  However, you can add any commands you want to the core profiles.
+
+Apex allows external devices to activate profiles using network communication.   Additionally, Apex allows profiles to be activated based on
+IR commands.
+
 # Is Apex Right for Me?
 
 Apex may be right of you if...
@@ -17,8 +55,11 @@ Apex may be right of you if...
 * Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
 * You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
 * You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
+* Your JVC does not reliabily turn on or off and you'd like rock solid behavior?
+* You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
+* Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
 
-# Example of Apex's Value
+# Example of Apex's HDR Optimization Value
 
 You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
 * Play HDR with Netflix
@@ -61,7 +102,7 @@ If you don't know how the serial ports are named on the device running Apex, you
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
 
-Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passthough mode.  Note that this feature is experimental.
+IR integration reuqires Apex to be running on a Linux machine
 
 # Discussion?
 
