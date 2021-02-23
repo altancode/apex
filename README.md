@@ -119,8 +119,8 @@ profiles:
     data: '01'
 ```
 
-All profiles follow a standard format.  First there is the profile name.   This is followed by an operation ("op") which is followed by a
-couple of different parameters.
+All profiles follow a standard format.  First there is the profile name.   This is followed by one more more operations ("op") and repsective operaiton
+parameters.
 
 ## "apexpm" operation
 This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
@@ -152,7 +152,7 @@ Here is an example of a raw command with data
 ```
 
 ## "rccode" operation
-This standards for remote control code.  This operation allows buttons from the remote to be simulated.  Using rccode is
+This stands for remote control code.  This operation allows buttons from the remote to be simulated.  Using rccode is
 not recommended because the JVC control protocol treats these exactly like IR commands, which means they might be missed or
 ignored.  The rccode operation is included only for completeness.   
 
@@ -164,6 +164,60 @@ Here is an example rccode that displays (or removes) the "Menu"
     data: '732E'
 ```
 
+## Bringing it Togher
+As stated, profiles can have multiple operations.  Below is an example profile called "profileExample" that combines some of the
+operations mentioned above.
+
+```
+  profileExample:
+    # select film mode
+    - op: apexpm
+    data: '00'
+
+  # set the aperture to -10
+  - op: raw
+    cmd: PMLA
+    numeric: -10
+
+  # Press the Menu button
+  - op: rccode
+    data: '732E'
+```
+
+# Network Control
+While any application can support the Apex protocol, Apex comes with a very simply tool to send network commands.
+This tool is called apexcmd.py.  Apexcmd tells Apex to enable a specific profile.  It requires the IP address
+of Apex to be specified along with the port being used.  Additionally, the shared secret must be specified along 
+with the name of the profile to activate.
+
+```
+python3 apexcmd.py -ip 192.168.100 -p 12345 -s secret -pf profileExample
+
+```
+
+# IR Key Support
+Apex allows a profile to be activated when an IR Key is recevied.   Currently Apex supports IR key functionality when
+running on Linux systems.   The IR functionality of the system must be setup and operational before Apex can know
+about IR keypresses.  This setup is beyond the scope of this document (but perhaps I'll add info later).
+
+The mapping from IR key to profile is done with the apex.yaml file.   The field "keymap" is used.   An example is shown below.
+
+```
+keymap:
+  KEY_F1: 
+    profile: profilePowerOn
+  KEY_F2: 
+    profile: profilePowerOff
+  KEY_1: 
+    profile: profileHDMI1
+  KEY_2: 
+    profile: profileHDMI2
+```
+
+In the above example, when Apex receives an IR keypress represented as "KEY_F1", it will activate the profile named "profilePowerOn".  When
+Apex receives the IR keypress represented as "KEY_1", Apex will activate the profile named "profileHDMI1".
+
+You can map any supported Linux key code to any defined profile.
 
 # Tips
 
