@@ -223,8 +223,6 @@ You can map any supported Linux key code to any defined profile.
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
 
-IR integration reuqires Apex to be running on a Linux machine
-
 # Discussion?
 
 Want to discuss Apex?  Check out this [thread on AVSForum](https://www.avsforum.com/threads/apex-—-jvc-rs500-600-hdfury-hdr-macro-optimization.3177726/#post-60365429)
