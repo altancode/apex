@@ -10,6 +10,13 @@
 ## Tell Linux to use the rs500.toml mappings
 ## sudo ir-keytable -c -w rs500.toml
 
+## show the current keytable
+## ir-keytable -r
+
+## Start automatically
+## add to /etc/rc.local
+## /usr/bin/ir-keytable -c -w /home/pi/apex/rs500.toml &> /tmp/log.txt
+
 ##
 ## imports
 ##
