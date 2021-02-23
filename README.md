@@ -17,14 +17,14 @@ Apex removes the need to connect a serial cable to the JVC because Apex communic
 
 # Apex Deep Control
 
-Apex allows commands from JVC's "External Control Command Communicaiton Specification" to be performed by network commands or IR keypresses.
+Apex allows commands from JVC's "External Control Command Communication Specification" to be performed by network commands or IR keypresses.
 Unlike using the projector's IR remote, or an automation solution like Harmony, Apex verifies that commands are actually performed.  With
 Apex, for example, you don't need to hard code length (40 second?) delays because the JVC is switching inputs or is powering on.   Apex will
 make sure the command is performed when the JVC is paying attention.
 
 Deep control allows the following types of settings to be adjusted
 
-* Lens Menory
+* Lens Memory
 * Aperture
 * Contrast
 * Brightness
@@ -36,11 +36,11 @@ Deep control allows the following types of settings to be adjusted
 # Apex Profiles
 
 Everything (almost) in Apex is a profile.   A profile is a named collection of JVC control commands.  A profile can have 1 command or many commands.
-Place whatever commands are needed to configure your JVC for your specific situation.  For example, you could createa a profile called 
+Place whatever commands are needed to configure your JVC for your specific situation.  For example, you could create a profile called 
 "cinemascope" which activates the appropriate picture mode, lens zoom, lens aperture and mask settings.  You can be confident that all the commands
 in your profile will be performed.
 
-In addition to custom profiles, Apex has several "core" profiles that are used with the HDR + HDFury integraton.   When the HD Fury devices
+In addition to custom profiles, Apex has several "core" profiles that are used with the HDR + HDFury integration.   When the HD Fury devices
 tells Apex (via serial) to activate a specific picture mode, Apex activates a core profile named similar to the picture mode.  For example,
 if HD Fury says to activate picture mode User 2 then Apex will enable profile "_APEX_PMUser2".  The default setting for profile "_APEX_PMUser2"
 is to use the Apex Optimized Picture Mode algorithm for User 2.  However, you can add any commands you want to the core profiles.
