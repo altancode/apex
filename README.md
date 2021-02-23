@@ -164,6 +164,11 @@ Here is an example rccode that displays (or removes) the "Menu"
     data: '732E'
 ```
 
+That that many older documents pertaining to remote control code often include only a single hex value, such as 2E.  In most
+cases you can make those work by simply adding 73 to the front (resulting in 732E).  The full 4 character code is supported by 
+Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
+If you want to send "Code B" commands, replace the 73 with 63.
+
 ## Bringing it Togher
 As stated, profiles can have multiple operations.  Below is an example profile called "profileExample" that combines some of the
 operations mentioned above.
