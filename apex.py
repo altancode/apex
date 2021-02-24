@@ -14,6 +14,7 @@ import x0state
 import misc
 import x0passthrough
 import x0opcmd
+import x0refcmd
 import x0netcontrol
 import x0keys
 import traceback
@@ -25,12 +26,15 @@ import traceback
 class ApexTaskEntry():
     """Class to hold values"""
 
-    def __init__(self, who, what):
+    def __init__(self, who, what, why, requirePowerOn):
         self.who = who
         self.what = what
+        self.why = why
+        self.requirePowerOn = requirePowerOn
 
     def __str__(self):
-        return f'ApexTaskEntry {self.who} {self.what}'
+        return f'ApexTaskEntry {self.who} {self.what} {self.why} {self.requirePowerOn}'
+
    
 ##
 ## globals
@@ -62,7 +66,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 if b:
                     log.debug(f'profile result {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                    localQueue.append(ApexTaskEntry(obj,('RC',b)))
+                    localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'apexpm' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -74,7 +78,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
 
                 if b:
                     log.debug(f'apexpm profile result {b}')
-                    localQueue.append(ApexTaskEntry(stateHDR, (b, None)))
+                    localQueue.append(ApexTaskEntry(stateHDR, (b, None), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                 cmd = op.get('cmd')
@@ -88,7 +92,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 if b:
                     log.debug(f'profile result {cmd} {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                    localQueue.append(ApexTaskEntry(obj,(cmd,b)))
+                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('numeric')) == int:
                 log.debug(f'inside number with {op}')
@@ -108,7 +112,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     if b:
                         log.debug(f'profile result {cmd} {b}')
                         obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                        localQueue.append(ApexTaskEntry(obj,(cmd,b)))
+                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', op.get('requirePowerOn',True)))
 
             else:
                 log.warning(f'Cannot parse {op}')
@@ -131,15 +135,28 @@ def profile2cmd(indata, profiles, jvcip, log, cfg, stateHDR):
     return localQueue
 
 
+def addPowerCheck(inlist, jvcip, log, cfg):
+    outlist = []
+    for x in inlist:
+        obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
+        outlist.append(ApexTaskEntry(obj,('PW',b''), 'apex', False))
+        outlist.append(x)
+
+    return outlist
+
+
 def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
+    # testOnetime = False
     taskQueue = []
     currentState = None
 
     chatty = False
     keepaliveOffset = 10
     nextKeepalive = time.time() + keepaliveOffset
+
+    jvcPoweredOn = False
 
     while True:
         try:
@@ -150,9 +167,20 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
             finished = True
             if currentState:
                 # we have a state, so we just keep working at it
-                finished = currentState.action()
+                finished,rsp = currentState.who.action()
                 if finished:
-                    log.debug('Finished processing task')
+                    if currentState.why == 'apex':
+                        log.debug(f'Finished processing task {rsp}')
+                        lastPowered = jvcPoweredOn
+                        if rsp == b'1' or rsp == b'3':
+                            # 1 is on
+                            # 3 is reserved but appears to mean "warming up"
+                            jvcPoweredOn = True
+                        else: 
+                            jvcPoweredOn = False
+
+                        if lastPowered != jvcPoweredOn:
+                            log.info(f'JVC Power State changed to {jvcPoweredOn}')
 
             if finished:
                 # get the next one to process
@@ -163,10 +191,13 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                         log.debug(f'   {i+1}: {val}')
 
                     next = taskQueue.pop(0)
-                    currentState = next.who
 
-                    log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
-                    next.who.set(next.what[0],next.what[1])
+                    if (not jvcPoweredOn) and next.requirePowerOn:
+                        log.info(f'Skipping because of jvcPoweredOn is {jvcPoweredOn} and {next}')
+                    else:
+                        currentState = next
+                        log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
+                        currentState.who.set(next.what[0],next.what[1])
 
             if currentState == None:
                 # empty stuff we don't want, such as stale responses or keep alive ack
@@ -197,13 +228,13 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                         profileName = '_APEX_PM' + misc.getPictureMode(pm)
                         log.info(f'HDFury said to activate profile {profileName} ({pm})')
 
-                        if currentState == stateHDR:
+                        if currentState and currentState.who == stateHDR:
                             # as an optimization we just change the currently running state
                             # this keeps the behavior we had prior
                             log.debug(f'Switching stateHDR in mid flight to {pm}')
                             stateHDR.set(pm,None)
                         else:
-                            taskQueue = taskQueue + singleProfile2cmd(profileName, profiles, jvcip, log, cfg, stateHDR)
+                            taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, jvcip, log, cfg, stateHDR), jvcip, log, cfg)
 
                     else:
                         log.error(f'Ignoring HDFury {rxData} {rxData[0:len(example)]} {example}')
@@ -218,13 +249,18 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                             verified.append(r)
                         else:
                             log.warning(f'Secret did not match in request for profile {r}')
-                    taskQueue = taskQueue + profile2cmd(verified, profiles, jvcip, log, cfg, stateHDR)
+                    taskQueue = taskQueue + addPowerCheck(profile2cmd(verified, profiles, jvcip, log, cfg, stateHDR), jvcip, log, cfg)
 
             if keyinput:
                 results = keyinput.action()
                 if len(results) > 0:
                     log.debug(f'keyinput results {results}')
-                    taskQueue = taskQueue + profile2cmd(results, profiles, jvcip, log, cfg, stateHDR)
+                    taskQueue = taskQueue + addPowerCheck(profile2cmd(results, profiles, jvcip, log, cfg, stateHDR),  jvcip, log, cfg)
+
+            # if testOnetime:
+            #     testOnetime = False
+            #     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
+            #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex', False))
 
         except Exception as ex:
             log.error(f'Big Problem Exception {ex}')

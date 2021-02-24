@@ -273,6 +273,7 @@ profiles:
   - op: raw 
     cmd: PW
     data: '1'
+    requirePowerOn: False
 
   profilePowerOff:
   # Power Off

@@ -104,6 +104,7 @@ class X0State:
                             # we just give up
                             # projector powered off?
                             log.warning(f'Giving up... JVC powered off?')
+                            self.state = ''
                             self.desired = None
                             self.checkwaitacktimeout = 0
 
@@ -126,7 +127,7 @@ class X0State:
                     else:
                         # what happened?
                         log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                        self.state = ''
+
 
         elif self.state == 'waitRefData':
             log.debug(f'Inside state "{self.state}"')
@@ -188,7 +189,7 @@ class X0State:
                     else:
                         # what happened?
                         log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                        self.state = ''
+
 
         elif self.state == 'waitOpACK':
             log.debug(f'Inside state "{self.state}"')
@@ -231,19 +232,20 @@ class X0State:
                 else:
                     # what happened?
                     log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                    self.state = ''
 
 
         else:
             log.error('**** YIKES {self.state}')
 
-        if self.state == '':
+
+        if not self.desired:
             # we are done
-            return True
+            return (True,None)
         else:
             # more to do
-            return False
+            return (False,None)
        
+
 
     def set(self, inDesired, _ignore):
         

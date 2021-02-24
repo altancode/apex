@@ -93,10 +93,10 @@ class X0OpCmd:
 
         if not self.desired:
             # we are done
-            return True
+            return (True,None)
         else:
             # more to do
-            return False
+            return (False,None)
 
        
 
