@@ -122,16 +122,23 @@ profiles:
 All profiles follow a standard format.  First there is the profile name.   This is followed by one more more operations ("op") and repsective operaiton
 parameters.
 
+By default, Apex will not send profile operations to the JVC when the JVC is powered off.   This is because the JVC protocol is rather basic and does not
+allow Apex to know if the JVC just missed a command or is intentionally ignoring it. This intelligent operation removes many situations where the JVC will
+likely ignore commands, allowing Apex to avoid retransmission and unwanted timeouts.  The optional parameter "requirePowerOn" can be set to False to change
+the default behavior.
+
+The profile operations are described below.
+
 ## "apexpm" operation
 This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
 should use apexpm instead of alternative methods.   When using apexpm, a "data" field must exist.  This indicates which picture mode
-to activate.   
+to activate.   The optional parameter "requirePowerOn" is supported.
 
 ## "raw" operation
 The raw operatiobn mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
 a numeric field.   Either one can be used, the two options exist to make your life easier.  If numeric is specified, Apex takes the
 specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
-data to be specified.
+data to be specified. The optional parameter "requirePowerOn" is supported.
 
 Here is an example of a raw command with numberic
 
@@ -154,7 +161,7 @@ Here is an example of a raw command with data
 ## "rccode" operation
 This stands for remote control code.  This operation allows buttons from the remote to be simulated.  Using rccode is
 not recommended because the JVC control protocol treats these exactly like IR commands, which means they might be missed or
-ignored.  The rccode operation is included only for completeness.   
+ignored.  The rccode operation is included only for completeness.  The optional parameter "requirePowerOn" is supported.
 
 Here is an example rccode that displays (or removes) the "Menu"
 
