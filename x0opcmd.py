@@ -23,6 +23,8 @@ class X0OpCmd:
         self.timeout = 0
         self.opAckOffset = timeoutConfig['jvcOpAckProfile']
         self.opcmd = b''
+        self.timeoutResend = 0
+        self.opAckResend = 1
 
 
     def action(self):
@@ -51,6 +53,7 @@ class X0OpCmd:
                 # it was sent
                 self.state = 'waitOpACK'
                 self.timeout = time.time() + self.opAckOffset
+                self.timeoutResend = time.time() + self.opAckResend
         
         elif self.state == 'waitOpACK':
             log.debug(f'Inside state "{self.state}"')
@@ -66,11 +69,14 @@ class X0OpCmd:
                     self.state = ''
                     self.desired = None
 
-                ## try sending the opcmd
-                log.debug('Sending opcmd again')
-                ok = self.comm.send(self.opcmd)
-                if not ok:
-                    log.warning(f'Send failed in {self.state}.   Consider optimisation')
+                elif time.time() > self.timeoutResend:
+                    ## try sending the opcmd
+                    log.debug(f'Sending opcmd again {self.opcmd}')
+                    ok = self.comm.send(self.opcmd)
+                    if not ok:
+                        log.warning(f'Send failed in {self.state}')
+                    self.timeoutResend = time.time() + self.opAckResend
+
 
             else:
                 # we got something
