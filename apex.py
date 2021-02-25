@@ -18,6 +18,7 @@ import x0refcmd
 import x0netcontrol
 import x0keys
 import x0smartpower
+import x0smarthdmi
 import traceback
 
 ##
@@ -68,6 +69,16 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     log.debug(f'profile result {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
+
+            elif op.get('op') == 'apex-hdmi' and type(op.get('data')) == str:
+                data = op.get('data')
+                cmd = '1'
+                if data == '2':
+                    cmd = '2'
+
+                log.debug(f'apex-hdmi result {cmd}')
+                obj = x0smarthdmi.X0SmartHDMI(jvcip, log, cfg['timeouts'])          
+                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'apex-power' and type(op.get('data')) == str:
                 data = op.get('data')

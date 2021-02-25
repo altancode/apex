@@ -83,16 +83,6 @@ profiles:
 #
 
   sampleProfile_DoNotActivate:
-  # Power On
-  - op: apex-power 
-    data: on
-  # - op: raw 
-  #   cmd: PW
-  #   data: '1'
-    
-  # Power Off
-  - op: apex-power 
-    data: off
 
   # HDMI1
   - op: raw
@@ -271,6 +261,7 @@ profiles:
 #
 
   profilePowerOn:
+  # Power On
   - op: apex-power 
     data: 'on'
     requirePowerOn: False
@@ -282,15 +273,13 @@ profiles:
 
   profileHDMI1:
   # HDMI1
-  - op: raw
-    cmd: IP
-    data: '6'
+  - op: apex-hdmi
+    data: '1'
 
   profileHDMI2:
   # HDMI2
-  - op: raw
-    cmd: IP
-    data: '7'
+  - op: apex-hdmi
+    data: '2'
 
   profileMenuButton:
   # RC code for Menu
