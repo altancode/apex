@@ -1,0 +1,7 @@
+#
+# Example Apex Command config file
+#
+
+ip: 192.168.10.160
+port: 12345
+secret: secret
