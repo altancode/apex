@@ -17,6 +17,7 @@ import x0opcmd
 import x0refcmd
 import x0netcontrol
 import x0keys
+import x0smartpower
 import traceback
 
 ##
@@ -68,7 +69,17 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
 
-            elif op.get('op') == 'apexpm' and type(op.get('data')) == str:
+            elif op.get('op') == 'apex-power' and type(op.get('data')) == str:
+                data = op.get('data')
+                cmd = 'off'
+                if data == 'on':
+                    cmd = 'on'
+
+                log.debug(f'apex-power result {cmd}')
+                obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])          
+                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', op.get('requirePowerOn',True)))
+            
+            elif op.get('op') == 'apex-pm' and type(op.get('data')) == str:
                 data = op.get('data')
                 b = None
                 try:
@@ -77,7 +88,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     log.error(f'Cannot convert data to binary {data} {ex}')
 
                 if b:
-                    log.debug(f'apexpm profile result {b}')
+                    log.debug(f'apex-pm profile result {b}')
                     localQueue.append(ApexTaskEntry(stateHDR, (b, None), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
@@ -148,7 +159,7 @@ def addPowerCheck(inlist, jvcip, log, cfg):
 def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
-    # testOnetime = False
+    testOnetime = False
     taskQueue = []
     currentState = None
 
@@ -257,8 +268,12 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                     log.debug(f'keyinput results {results}')
                     taskQueue = taskQueue + addPowerCheck(profile2cmd(results, profiles, jvcip, log, cfg, stateHDR),  jvcip, log, cfg)
 
-            # if testOnetime:
-            #     testOnetime = False
+            if testOnetime:
+                testOnetime = False
+
+                obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])
+                taskQueue.append(ApexTaskEntry(obj,('off',b''), 'user', False))
+
             #     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
             #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex', False))
 
@@ -273,7 +288,7 @@ def apexMain():
 
     global log
 
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] [%(module)s]: %(message)s')
     formatter.default_msec_format = '%s.%03d'
     log = logging.getLogger("jvcx0")
     log.setLevel(logging.DEBUG)
