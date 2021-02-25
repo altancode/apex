@@ -111,11 +111,11 @@ profiles:
 # However, you are more than welcone to change the contents of the profile
 
   _APEX_PMFilm:
-  - op: apexpm
+  - op: apex-pm
     data: '00'
 
   _APEX_PMCinema:
-  - op: apexpm
+  - op: apex-pm
     data: '01'
 ```
 
@@ -129,9 +129,9 @@ the default behavior.
 
 The profile operations are described below.
 
-## "apexpm" operation
+## "apex-pm" operation
 This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
-should use apexpm instead of alternative methods.   When using apexpm, a "data" field must exist.  This indicates which picture mode
+should use apex-pm instead of alternative methods.   When using apex-pm, a "data" field must exist.  This indicates which picture mode
 to activate.   The optional parameter "requirePowerOn" is supported.
 
 ## "raw" operation
@@ -183,7 +183,7 @@ operations mentioned above.
 ```
   profileExample:
     # select film mode
-    - op: apexpm
+    - op: apex-pm
     data: '00'
 
   # set the aperture to -10
