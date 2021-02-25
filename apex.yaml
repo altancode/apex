@@ -29,50 +29,50 @@ profiles:
 # Apex Core Profiles
 # Profile names beginning with _APEX_ have specific meaning and should not be removed
 # However, you are more than welcone to change the contents of the profile
-# Although you probably only want to add steps after the initial apexpm operation 
+# Although you probably only want to add steps after the initial apex-pm operation 
 #
   _APEX_PMFilm:
-  - op: apexpm
+  - op: apex-pm
     data: '00'
 
   _APEX_PMCinema:
-  - op: apexpm
+  - op: apex-pm
     data: '01'
 
   _APEX_PMAnimation:
-  - op: apexpm
+  - op: apex-pm
     data: '02'
 
   _APEX_PMNatural:
-  - op: apexpm
+  - op: apex-pm
     data: '03'
 
   _APEX_PMTHX:
-  - op: apexpm
+  - op: apex-pm
     data: '06'
 
   _APEX_PMUser1:
-  - op: apexpm
+  - op: apex-pm
     data: '0C'
 
   _APEX_PMUser2:
-  - op: apexpm
+  - op: apex-pm
     data: '0D'
   
   _APEX_PMUser3:
-  - op: apexpm
+  - op: apex-pm
     data: '0E'
 
   _APEX_PMUser4:
-  - op: apexpm
+  - op: apex-pm
     data: '0F'
 
   _APEX_PMUser5:
-  - op: apexpm
+  - op: apex-pm
     data: '10'
 
   _APEX_PMUser6:
-  - op: apexpm
+  - op: apex-pm
     data: '11'
 
 #
@@ -84,14 +84,15 @@ profiles:
 
   sampleProfile_DoNotActivate:
   # Power On
-  - op: raw 
-    cmd: PW
-    data: '1'
+  - op: apex-power 
+    data: on
+  # - op: raw 
+  #   cmd: PW
+  #   data: '1'
     
   # Power Off
-  - op: raw 
-    cmd: PW
-    data: '0'
+  - op: apex-power 
+    data: off
 
   # HDMI1
   - op: raw
@@ -219,47 +220,47 @@ profiles:
     data: '2'
 
   # Picture Mode Film
-  - op: apexpm
+  - op: apex-pm
     data: '00'
 
   # Picture Mode Cinema
-  - op: apexpm
+  - op: apex-pm
     data: '01'
 
   # Picture Mode Animation
-  - op: apexpm
+  - op: apex-pm
     data: '02'
 
   # Picture Mode Natural
-  - op: apexpm
+  - op: apex-pm
     data: '03'
 
   # Picture Mode THX
-  - op: apexpm
+  - op: apex-pm
     data: '06'
 
   # Picture Mode User1
-  - op: apexpm
+  - op: apex-pm
     data: '0C'
 
   # Picture Mode User2
-  - op: apexpm
+  - op: apex-pm
     data: '0D'
   
   # Picture Mode User3
-  - op: apexpm
+  - op: apex-pm
     data: '0E'
 
   # Picture Mode User4
-  - op: apexpm
+  - op: apex-pm
     data: '0F'
 
   # Picture Mode User5
-  - op: apexpm
+  - op: apex-pm
     data: '10'
 
   # Picture Mode User6
-  - op: apexpm
+  - op: apex-pm
     data: '11'
 
 
@@ -270,16 +271,14 @@ profiles:
 #
 
   profilePowerOn:
-  - op: raw 
-    cmd: PW
-    data: '1'
+  - op: apex-power 
+    data: 'on'
     requirePowerOn: False
 
   profilePowerOff:
   # Power Off
-  - op: raw 
-    cmd: PW
-    data: '0'
+  - op: apex-power 
+    data: 'off'
 
   profileHDMI1:
   # HDMI1
