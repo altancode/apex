@@ -132,7 +132,44 @@ The profile operations are described below.
 ## "apex-pm" operation
 This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
 should use apex-pm instead of alternative methods.   When using apex-pm, a "data" field must exist.  This indicates which picture mode
-to activate.   The optional parameter "requirePowerOn" is supported.
+to activate.   The optional parameter "requirePowerOn" is supported.  See the default apex.yanl file for the mapping of the data
+parameter to picture mode names.
+
+```
+  _APEX_PMFilm:
+  # Activate picture mode Film
+  - op: apex-pm
+    data: '00'
+```
+
+## "apex-hdmi" operation
+Special sauce?   Yes.   Using the operaiton apex-hdmi avoids activating a HDMI input if it's already active.   The data parameter 
+is '1' for HDMI 1 and '2' for HDMI2.  The optional parameter "requirePowerOn" is supported.
+
+```
+  profileHDMI1:
+  # HDMI1
+  - op: apex-hdmi
+    data: '1'
+```
+
+## "apex-power" operation
+More Apex special sauce, the apex-power operation not only tells the JVC to turn on or off, but ensures that it does turn on or off.
+Using the raw commands you may find the JVC says it turned off but actually does not.   Because of this, it is recommended that
+apex-power be used for all power on/off operations.   When using apex-poower, a "data" field must exist.   This indicates whether to 
+power on or power off the JVC.  The optional parameter "requirePowerOn" is supported.
+
+```
+  - op: apex-power 
+  # Power On
+    data: 'on'
+    requirePowerOn: False
+
+  profilePowerOff:
+  # Power Off
+  - op: apex-power 
+    data: 'off'
+```
 
 ## "raw" operation
 The raw operatiobn mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
