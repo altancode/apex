@@ -234,15 +234,33 @@ operations mentioned above.
 ```
 
 # Network Control
-While any application can support the Apex protocol, Apex comes with a very simply tool to send network commands.
-This tool is called apexcmd.py.  Apexcmd tells Apex to enable a specific profile.  It requires the IP address
-of Apex to be specified along with the port being used.  Additionally, the shared secret must be specified along 
-with the name of the profile to activate.
+While any application can support the Apex protocol, Apex comes with a very simple tool to send network commands.
+This tool is called apexcmd.py.  Apexcmd tells Apex to enable a specific profile.  You can run apexcmd with or
+without a configuration file.
+
+By default, apexcmd looks for the configuration file apexcmd.yaml in the current directory.   This file has the values
+for Apex Server IP, Apex port IP and the shared secret.   The name and location of this file can be changed by 
+using the --configfile parameter.  It looks like the following
 
 ```
-python3 apexcmd.py -ip 192.168.100 -p 12345 -s secret -pf profileExample
+#
+# Example Apex Command config file
+#
+
+ip: 192.168.1.123
+port: 12345
+secret: secret
+```
+
+When using the config file, the --profile parameter specifies the profile to execute.   For example:
 
 ```
+python3 apexcmd.py --profile profileHDMI1
+```
+
+You can override any of the fields in the config with the command line options --ip, --port and --secret.   If
+you do not want to use a config file at all, you can specifiy the --noconfigfile.
+
 
 # IR Key Support
 Apex allows a profile to be activated when an IR Key is recevied.   Currently Apex supports IR key functionality when
