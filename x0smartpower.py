@@ -90,15 +90,27 @@ class X0SmartPower:
                 # 1 - lamp on
                 # 2 - cooling
                 # 3-  reserved (warming up?)
-                jvcIsOn = (rsp == b'1') or (rsp == b'3')
-                if ((self.desired == b'1' and jvcIsOn) or (self.desired == b'0' and (not jvcIsOn))):
-                    self.log.info(f'Power state is as expected {self.desired} {rsp}')
-                    self.state = ''
-                    self.desired = None
+
+                if self.desired == b'1' and rsp == b'3':
+                    # JVC is apparently warming up
+                    self.log.debug(f'JVC is apparently warming up... Waiting... {self.desired} {rsp}')
+
+                    # now we need to verify agian -- see if we come into full on mode
+                    self.operation = x0refcmd.X0RefCmd(self.jvcip, self.log, self.cfg)
+                    self.operation.set('PW',b'')
+
+                    self.state = 'validating'
+
                 else:
-                    self.log.info(f'Inconsistent Power State (will try again) {self.desired} {rsp}')
-                    self.state = 'delay'
-                    self.waitUntil = time.time() + 5
+                    jvcIsOn = (rsp == b'1')
+                    if ((self.desired == b'1' and jvcIsOn) or (self.desired == b'0' and (not jvcIsOn))):
+                        self.log.info(f'Power state is as expected {self.desired} {rsp}')
+                        self.state = ''
+                        self.desired = None
+                    else:
+                        self.log.info(f'Inconsistent Power State (will try again) {self.desired} {rsp}')
+                        self.state = 'delay'
+                        self.waitUntil = time.time() + 5
 
         elif self.state == 'delay':
 
