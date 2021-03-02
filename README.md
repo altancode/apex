@@ -1,6 +1,11 @@
 # Apex
 
-The initial version of Apex optimizes the JVC + HD Fury HDR experience.
+Apex is a powerful tool to control your JVC projector.   Apex offers several features.
+
+1. Apex optimizes the JVC + HD Fury HDR experience.
+2. Apex allows deep control of the JVC using both network connectivity and IR
+
+# Apex HDR Experience Optimization
 
 The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
 
@@ -10,6 +15,39 @@ Apex works intelligently with the JVC and sends the macro command as soon as the
 
 Apex removes the need to connect a serial cable to the JVC because Apex communicates with the JVC using Internet Protocol.  The HDFury is now connected by serial to the device running Apex.
 
+# Apex Deep Control
+
+Apex allows commands from JVC's "External Control Command Communication Specification" to be performed by network commands or IR keypresses.
+Unlike using the projector's IR remote, or an automation solution like Harmony, Apex verifies that commands are actually performed.  With
+Apex, for example, you don't need to hard code length (40 second?) delays because the JVC is switching inputs or is powering on.   Apex will
+make sure the command is performed when the JVC is paying attention.
+
+Deep control allows the following types of settings to be adjusted
+
+* Lens Memory
+* Aperture
+* Contrast
+* Brightness
+* Gamma table
+* Mask
+* Lamp Power
+* Etc.
+
+# Apex Profiles
+
+Everything (almost) in Apex is a profile.   A profile is a named collection of JVC control commands.  A profile can have 1 command or many commands.
+Place whatever commands are needed to configure your JVC for your specific situation.  For example, you could create a profile called 
+"cinemascope" which activates the appropriate picture mode, lens zoom, lens aperture and mask settings.  You can be confident that all the commands
+in your profile will be performed.
+
+In addition to custom profiles, Apex has several "core" profiles that are used with the HDR + HDFury integration.   When the HD Fury devices
+tells Apex (via serial) to activate a specific picture mode, Apex activates a core profile named similar to the picture mode.  For example,
+if HD Fury says to activate picture mode User 2 then Apex will enable profile "_APEX_PMUser2".  The default setting for profile "_APEX_PMUser2"
+is to use the Apex Optimized Picture Mode algorithm for User 2.  However, you can add any commands you want to the core profiles.
+
+Apex allows external devices to activate profiles using network communication.   Additionally, Apex allows profiles to be activated based on
+IR commands.
+
 # Is Apex Right for Me?
 
 Apex may be right of you if...
@@ -17,8 +55,11 @@ Apex may be right of you if...
 * Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
 * You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
 * You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
+* Your JVC does not reliabily turn on or off and you'd like rock solid behavior?
+* You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
+* Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
 
-# Example of Apex's Value
+# Example of Apex's HDR Optimization Value
 
 You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
 * Play HDR with Netflix
@@ -44,6 +85,8 @@ Apex is written in Python 3.  There are a million ways to run python code.  Belo
 1. Retrieve Apex from the Repo
 1. Install the requirements using "pip3 install -r requirements.txt"
 1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, change "jvcip" to be the IP of the JVC projector and change "hdfury" to be the serial device name of the HDFury device.
+1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex is listen on for external commands.  Also change 
+"netcontrolsecret" to a secret value for your specific setup.
 1. Eventually you'll want to have Apex start automatically, but to get started you can simply use "python3 apex.py"
 
 # HDFury Setup
@@ -57,11 +100,195 @@ If you don't know how the serial ports are named on the device running Apex, you
 1. Make sure the Macro "Send on every sync" is checked. 
 1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device is save the new settings.
 
+# Profile Details
+
+Profiles are stored in the apex.yaml file.  All profiles, whether custom or core, exist under the "profiles" entry.  Below is an example.
+
+```
+profiles:
+# Apex Core Profiles
+# Profile names beginning with _APEX_ have specific meaning and should not be removed
+# However, you are more than welcone to change the contents of the profile
+
+  _APEX_PMFilm:
+  - op: apex-pm
+    data: '00'
+
+  _APEX_PMCinema:
+  - op: apex-pm
+    data: '01'
+```
+
+All profiles follow a standard format.  First there is the profile name.   This is followed by one more more operations ("op") and repsective operaiton
+parameters.
+
+By default, Apex will not send profile operations to the JVC when the JVC is powered off.   This is because the JVC protocol is rather basic and does not
+allow Apex to know if the JVC just missed a command or is intentionally ignoring it. This intelligent operation removes many situations where the JVC will
+likely ignore commands, allowing Apex to avoid retransmission and unwanted timeouts.  The optional parameter "requirePowerOn" can be set to False to change
+the default behavior.
+
+The profile operations are described below.
+
+## "apex-pm" operation
+This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
+should use apex-pm instead of alternative methods.   When using apex-pm, a "data" field must exist.  This indicates which picture mode
+to activate.   The optional parameter "requirePowerOn" is supported.  See the default apex.yanl file for the mapping of the data
+parameter to picture mode names.
+
+```
+  _APEX_PMFilm:
+  # Activate picture mode Film
+  - op: apex-pm
+    data: '00'
+```
+
+## "apex-hdmi" operation
+Special sauce?   Yes.   Using the operaiton apex-hdmi avoids activating a HDMI input if it's already active.   The data parameter 
+is '1' for HDMI 1 and '2' for HDMI2.  The optional parameter "requirePowerOn" is supported.
+
+```
+  profileHDMI1:
+  # HDMI1
+  - op: apex-hdmi
+    data: '1'
+```
+
+## "apex-power" operation
+More Apex special sauce, the apex-power operation not only tells the JVC to turn on or off, but ensures that it does turn on or off.
+Using the raw commands you may find the JVC says it turned off but actually does not.   Because of this, it is recommended that
+apex-power be used for all power on/off operations.   When using apex-poower, a "data" field must exist.   This indicates whether to 
+power on or power off the JVC.  The optional parameter "requirePowerOn" is supported.
+
+```
+  - op: apex-power 
+  # Power On
+    data: 'on'
+    requirePowerOn: False
+
+  profilePowerOff:
+  # Power Off
+  - op: apex-power 
+    data: 'off'
+```
+
+## "raw" operation
+The raw operatiobn mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
+a numeric field.   Either one can be used, the two options exist to make your life easier.  If numeric is specified, Apex takes the
+specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
+data to be specified. The optional parameter "requirePowerOn" is supported.
+
+Here is an example of a raw command with numberic
+
+```
+  # set the aperture to -10
+  - op: raw
+    cmd: PMLA
+    numeric: -10
+```
+
+Here is an example of a raw command with data
+
+```
+  # Gamma Custom 2
+  - op: raw
+    cmd: PMGT
+    data: '5'
+```
+
+## "rccode" operation
+This stands for remote control code.  This operation allows buttons from the remote to be simulated.  Using rccode is
+not recommended because the JVC control protocol treats these exactly like IR commands, which means they might be missed or
+ignored.  The rccode operation is included only for completeness.  The optional parameter "requirePowerOn" is supported.
+
+Here is an example rccode that displays (or removes) the "Menu"
+
+```
+  # RC code for Menu
+  - op: rccode
+    data: '732E'
+```
+
+That that many older documents pertaining to remote control code often include only a single hex value, such as 2E.  In most
+cases you can make those work by simply adding 73 to the front (resulting in 732E).  The full 4 character code is supported by 
+Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
+If you want to send "Code B" commands, replace the 73 with 63.
+
+## Bringing it Togher
+As stated, profiles can have multiple operations.  Below is an example profile called "profileExample" that combines some of the
+operations mentioned above.
+
+```
+  profileExample:
+    # select film mode
+    - op: apex-pm
+    data: '00'
+
+  # set the aperture to -10
+  - op: raw
+    cmd: PMLA
+    numeric: -10
+
+  # Press the Menu button
+  - op: rccode
+    data: '732E'
+```
+
+# Network Control
+While any application can support the Apex protocol, Apex comes with a very simple tool to send network commands.
+This tool is called apexcmd.py.  Apexcmd tells Apex to enable a specific profile.  You can run apexcmd with or
+without a configuration file.
+
+By default, apexcmd looks for the configuration file apexcmd.yaml in the current directory.   This file has the values
+for Apex Server IP, Apex port IP and the shared secret.   The name and location of this file can be changed by 
+using the --configfile parameter.  It looks like the following
+
+```
+#
+# Example Apex Command config file
+#
+
+ip: 192.168.1.123
+port: 12345
+secret: secret
+```
+
+When using the config file, the --profile parameter specifies the profile to execute.   For example:
+
+```
+python3 apexcmd.py --profile profileHDMI1
+```
+
+You can override any of the fields in the config with the command line options --ip, --port and --secret.   If
+you do not want to use a config file at all, you can specifiy the --noconfigfile.
+
+
+# IR Key Support
+Apex allows a profile to be activated when an IR Key is recevied.   Currently Apex supports IR key functionality when
+running on Linux systems.   The IR functionality of the system must be setup and operational before Apex can know
+about IR keypresses.  This setup is beyond the scope of this document (but perhaps I'll add info later).
+
+The mapping from IR key to profile is done with the apex.yaml file.   The field "keymap" is used.   An example is shown below.
+
+```
+keymap:
+  KEY_F1: 
+    profile: profilePowerOn
+  KEY_F2: 
+    profile: profilePowerOff
+  KEY_1: 
+    profile: profileHDMI1
+  KEY_2: 
+    profile: profileHDMI2
+```
+
+In the above example, when Apex receives an IR keypress represented as "KEY_F1", it will activate the profile named "profilePowerOn".  When
+Apex receives the IR keypress represented as "KEY_1", Apex will activate the profile named "profileHDMI1".
+
+You can map any supported Linux key code to any defined profile.
+
 # Tips
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
-
-Apex also supports a basic passthrough mode where Apex's intelligent behavior is disabled and it acts as a dumb serial to IP bridge.  This mode can be used to compare behavior with and without Apex's intelligence.  Use the flag "passthrough" when launching Apex to enable passthough mode.  Note that this feature is experimental.
 
 # Discussion?
 

@@ -10,7 +10,7 @@ import misc
 ##
 
 class X0State:
-    """THe main Apex state object that does the magic"""
+    """The main Apex state object that does the magic"""
 
     def __init__(self, inComm, useLog,timeoutConfig, closeOnComplete):
 
@@ -36,23 +36,23 @@ class X0State:
         # this is where the work happens
 #        log.debug(f'Action called in state "{self.state}" with desired {self.desired}')
 
-        if self.desired == None:
-            # enoty stuff we don't want, such as stale responses or keep alive ack
-            self.comm.read(emptyIt = True)
+        # if self.desired == None:
+        #     # enoty stuff we don't want, such as stale responses or keep alive ack
+        #     self.comm.read(emptyIt = True)
 
-            # check if keepalive time
-            if time.time() > self.nextKeepalive:
-                # it is!
-                cmd = b'!\x89\x01\x00\x00\n'
-                if self.chatty:
-                    log.debug(f'Sending keep alive {cmd}')
-                ok = self.comm.send(cmd)
-                if not ok:
-                    log.warning(f'Unable to send keep alive')
+        #     # check if keepalive time
+        #     if time.time() > self.nextKeepalive:
+        #         # it is!
+        #         cmd = b'!\x89\x01\x00\x00\n'
+        #         if self.chatty:
+        #             log.debug(f'Sending keep alive {cmd}')
+        #         ok = self.comm.send(cmd)
+        #         if not ok:
+        #             log.warning(f'Unable to send keep alive')
         
-                self.nextKeepalive = time.time() + self.keepaliveOffset
+        #         self.nextKeepalive = time.time() + self.keepaliveOffset
 
-            return
+        #     return True
 
         # '' means nothing is going on
         # 'waitRefACK' means we have sent a Reference command and are waiting for the ack response
@@ -104,6 +104,7 @@ class X0State:
                             # we just give up
                             # projector powered off?
                             log.warning(f'Giving up... JVC powered off?')
+                            self.state = ''
                             self.desired = None
                             self.checkwaitacktimeout = 0
 
@@ -126,7 +127,7 @@ class X0State:
                     else:
                         # what happened?
                         log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                        self.state = ''
+
 
         elif self.state == 'waitRefData':
             log.debug(f'Inside state "{self.state}"')
@@ -188,7 +189,7 @@ class X0State:
                     else:
                         # what happened?
                         log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                        self.state = ''
+
 
         elif self.state == 'waitOpACK':
             log.debug(f'Inside state "{self.state}"')
@@ -231,14 +232,22 @@ class X0State:
                 else:
                     # what happened?
                     log.warning(f'Wanted {exp} but got {rxData}.  Ignoring...')
-#                    self.state = ''
 
 
         else:
             log.error('**** YIKES {self.state}')
+
+
+        if not self.desired:
+            # we are done
+            return (True,None)
+        else:
+            # more to do
+            return (False,None)
        
 
-    def set(self, inDesired):
+
+    def set(self, inDesired, _ignore):
         
         if inDesired == self.desired:
             # same mode

@@ -1,6 +1,9 @@
 jvcip: '192.168.10.202'
 jvcport: 20554
 hdfury: '/dev/ttyUSB0'
+netcontrolport: 12345
+netcontrolsecret: 'secret'
+keydevice: '/dev/input/event0'
 #hdfury: '/dev/tty.usbserial-1420'
 #slowdown: 2
 
@@ -10,3 +13,302 @@ hdfury: '/dev/ttyUSB0'
 #  jvcRefAck: 0.25
 #  jvcDefault: 2
 #  jvcOpAck: 20
+
+keymap:
+  KEY_F1: 
+    profile: profilePowerOn
+  KEY_F2: 
+    profile: profilePowerOff
+  KEY_1: 
+    profile: profileHDMI1
+  KEY_2: 
+    profile: profileHDMI2
+
+profiles:
+#
+# Apex Core Profiles
+# Profile names beginning with _APEX_ have specific meaning and should not be removed
+# However, you are more than welcone to change the contents of the profile
+# Although you probably only want to add steps after the initial apex-pm operation 
+#
+  _APEX_PMFilm:
+  - op: apex-pm
+    data: '00'
+
+  _APEX_PMCinema:
+  - op: apex-pm
+    data: '01'
+
+  _APEX_PMAnimation:
+  - op: apex-pm
+    data: '02'
+
+  _APEX_PMNatural:
+  - op: apex-pm
+    data: '03'
+
+  _APEX_PMTHX:
+  - op: apex-pm
+    data: '06'
+
+  _APEX_PMUser1:
+  - op: apex-pm
+    data: '0C'
+
+  _APEX_PMUser2:
+  - op: apex-pm
+    data: '0D'
+  
+  _APEX_PMUser3:
+  - op: apex-pm
+    data: '0E'
+
+  _APEX_PMUser4:
+  - op: apex-pm
+    data: '0F'
+
+  _APEX_PMUser5:
+  - op: apex-pm
+    data: '10'
+
+  _APEX_PMUser6:
+  - op: apex-pm
+    data: '11'
+
+#
+# Sample Profile with potentially useful commands
+# Do not activate this profile or else it is going to run a ton of commands
+# you certainly do not want
+# Rather, use these commands in your own profiles!
+#
+
+  sampleProfile_DoNotActivate:
+
+  # HDMI1
+  - op: raw
+    cmd: IP
+    data: '6'
+
+  # HDMI2
+  - op: raw
+    cmd: IP
+    data: '7'
+
+  # Contrast to value zero (change numeric parameter for other values)
+  - op: raw
+    cmd: PMCN
+    numeric: 0
+
+  # Brightness to value zero (change numeric parameter for other values)
+  - op: raw
+    cmd: PMBR
+    numeric: 0
+
+  # Intelligent Lens Aperture (Dynamic Iris) Off
+  - op: raw
+    cmd: PMDI
+    data: '0'
+
+  # Intelligent Lens Aperture (Dynamic Iris) Auto1
+  - op: raw
+    cmd: PMDI
+    data: '1'
+
+  # Intelligent Lens Aperture (Dynamic Iris) Auto2
+  - op: raw
+    cmd: PMDI
+    data: '2'
+
+  # Aperture to 0 (change numeric parameter for other values, cannot be in auto mode when performed)
+  - op: raw
+    cmd: PMLA
+    numeric: 0
+
+  # Lamp Power Normal
+  - op: raw
+    cmd: PMLP
+    data: '0'
+
+  # Lamp Power High
+  - op: raw
+    cmd: PMLP
+    data: '1'
+
+  # Load Lens Memory 1 (for other memory, chance data to be slot minus 1)
+  - op: raw
+    cmd: INML
+    data: '0'
+
+  # Gamma Normal
+  - op: raw
+    cmd: PMGT
+    data: '0'
+
+  # Gamma A
+  - op: raw
+    cmd: PMGT
+    data: '1'
+
+  # Gamma B
+  - op: raw
+    cmd: PMGT
+    data: '2'
+
+  # Gamma C
+  - op: raw
+    cmd: PMGT
+    data: '3'
+
+  # Gamma Custom 1
+  - op: raw
+    cmd: PMGT
+    data: '4'
+
+  # Gamma Custom 2
+  - op: raw
+    cmd: PMGT
+    data: '5'
+
+  # Gamma Custom 3
+  - op: raw
+    cmd: PMGT
+    data: '6'
+
+  # Gamma D
+  - op: raw
+    cmd: PMGT
+    data: '7'
+
+  # Gamma Film1
+  - op: raw
+    cmd: PMGT
+    data: 'A'
+
+  # Gamma Film2
+  - op: raw
+    cmd: PMGT
+    data: 'B'
+
+  # Mask Switch Custom 1
+  - op: raw
+    cmd: ISMA
+    data: '0'
+
+  # Mask Switch Custom 2
+  - op: raw
+    cmd: ISMA
+    data: '1'
+
+  # Mask Switch Custom 3
+  - op: raw
+    cmd: ISMA
+    data: '3'
+
+  # Mask Switch Off
+  - op: raw
+    cmd: ISMA
+    data: '2'
+
+  # Picture Mode Film
+  - op: apex-pm
+    data: '00'
+
+  # Picture Mode Cinema
+  - op: apex-pm
+    data: '01'
+
+  # Picture Mode Animation
+  - op: apex-pm
+    data: '02'
+
+  # Picture Mode Natural
+  - op: apex-pm
+    data: '03'
+
+  # Picture Mode THX
+  - op: apex-pm
+    data: '06'
+
+  # Picture Mode User1
+  - op: apex-pm
+    data: '0C'
+
+  # Picture Mode User2
+  - op: apex-pm
+    data: '0D'
+  
+  # Picture Mode User3
+  - op: apex-pm
+    data: '0E'
+
+  # Picture Mode User4
+  - op: apex-pm
+    data: '0F'
+
+  # Picture Mode User5
+  - op: apex-pm
+    data: '10'
+
+  # Picture Mode User6
+  - op: apex-pm
+    data: '11'
+
+
+#
+# User Profiles are below
+# These can have any name and perform any steps you want
+# The content below are poor examples
+#
+
+  profilePowerOn:
+  # Power On
+  - op: apex-power 
+    data: 'on'
+    requirePowerOn: False
+
+  profilePowerOff:
+  # Power Off
+  - op: apex-power 
+    data: 'off'
+
+  profileHDMI1:
+  # HDMI1
+  - op: apex-hdmi
+    data: '1'
+
+  profileHDMI2:
+  # HDMI2
+  - op: apex-hdmi
+    data: '2'
+
+  profileMenuButton:
+  # RC code for Menu
+  - op: rccode
+    data: '732E'
+
+  profileTest1:
+  - op: raw
+    cmd: IP
+    data: '7'
+  - op: rccode
+    data: '732E'
+  - op: rccode
+    data: '7301'
+  - op: rccode
+    data: '7302'
+    
+  profile2Test:
+  - op: raw
+    cmd: PMLA
+    numeric: -2
+
+  profile3Test:
+  - op: raw
+    cmd: PMCN
+    numeric: -11
+
+  profile4Test:
+  - op: raw
+    cmd: PMCN
+    numeric: 0
+  
