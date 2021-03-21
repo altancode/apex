@@ -120,7 +120,7 @@ class X0State:
                     exp = b'\x06\x89\x01PM\x0A'
                     if rxData == exp:
                         # got the ack
-                        log.info(f'Got the Picture Mode reference ACK')
+                        log.debug(f'Got the Picture Mode reference ACK')
                         self.state = 'waitRefData'
                         self.timeout = time.time() + self.defaultOffset
 
@@ -160,7 +160,7 @@ class X0State:
                         pjstate = rxData[5:7]
                         if pjstate == self.desired:
                             # already in this state
-                            log.info(f'**** Already set to desired picture mode {misc.getPictureMode(self.desired)} {self.desired}')
+                            log.info(f'Already set to desired picture mode {misc.getPictureMode(self.desired)} {self.desired}')
                             self.state = ''
                             self.desired = None
 
@@ -171,7 +171,7 @@ class X0State:
 
                         else:
                             # start the command to change the state
-                            log.info(f'**** Attempting to change picture mode to {misc.getPictureMode(self.desired)} {self.desired}')
+                            log.info(f'Attempting to change picture mode to {misc.getPictureMode(self.desired)} {self.desired}')
 
                             # ex: "b'!\x89\x01PMPM0D\n'"
                             cmd = b'!\x89\x01PMPM'
@@ -220,7 +220,7 @@ class X0State:
                     ##
                     ## SUCCESS!
                     ##
-                    log.info(f'**** Picture Mode successfully changed to {misc.getPictureMode(self.desired)} {self.desired}')
+                    log.info(f'Picture Mode successfully changed to {misc.getPictureMode(self.desired)} {self.desired}')
                     self.state = ''
                     self.desired = None
 
@@ -251,10 +251,10 @@ class X0State:
         
         if inDesired == self.desired:
             # same mode
-            log.info(f'!!!! Desired picture mode is same as previouos {misc.getPictureMode(self.desired)} {self.desired}')
+            log.info(f'Desired picture mode is same as previous {misc.getPictureMode(self.desired)} {self.desired}')
         else:
             self.desired = inDesired
-            log.info(f'!!!! Desired picture mode is now {misc.getPictureMode(self.desired)} {self.desired}')
+            log.info(f'Desired picture mode is now {misc.getPictureMode(self.desired)} {self.desired}')
 
             ## getting this while waiting for results may be an indication
             ## that the JVC will NOT respond

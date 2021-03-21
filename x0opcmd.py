@@ -88,7 +88,7 @@ class X0OpCmd:
                     ##
                     ## SUCCESS!
                     ##
-                    log.info(f'**** Operation Command Successfully Performed {self.desired}')
+                    log.info(f'Operation Command Successfully Performed {self.desired}')
                     self.state = ''
                     self.desired = None
                 else:
@@ -114,7 +114,7 @@ class X0OpCmd:
             log.warning(f'!!!! Already sending command {combined}')
         else:
             self.desired = combined
-            log.info(f'!!!! Asked to send command {combined}')
+            log.info(f'Asked to send operation command {combined}')
 
             # definitely need to restart the state machine
             self.state = ''

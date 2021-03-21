@@ -90,7 +90,7 @@ class X0RefCmd:
                     exp = b'\x06\x89\x01' + self.desired[0:2] + b'\x0a'
                     if rxData == exp:
                         # got the ack
-                        log.info(f'Got the reference ACK {rxData}')
+                        log.debug(f'Got the reference ACK {rxData}')
                         self.state = 'waitRefData'
                         self.timeout = time.time() + self.defaultOffset
 
@@ -153,7 +153,7 @@ class X0RefCmd:
             log.warning(f'!!!! Already sending command {combined}')
         else:
             self.desired = combined
-            log.info(f'!!!! Asked to send command {combined}')
+            log.info(f'Asked to send reference command {combined}')
 
             # definitely need to restart the state machine
             self.state = ''

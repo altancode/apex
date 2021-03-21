@@ -84,7 +84,7 @@ class X0SmartPower:
             finished, rsp = self.operation.action()
 
             if finished:
-                self.log.info(f'JVC verified the power state is {rsp}')
+                self.log.debug(f'JVC verified the power state is {rsp}')
 
                 # 0 - standby
                 # 1 - lamp on
@@ -115,7 +115,7 @@ class X0SmartPower:
         elif self.state == 'delay':
 
             if time.time() > self.waitUntil:
-                self.log.info('Attempting power mode change again')
+                self.log.debug('Attempting power mode change again')
                 self.attempts += 1
                 self.state = ''
 
@@ -141,7 +141,7 @@ class X0SmartPower:
             self.desired = b'0'
             if cmd == 'on':
                 self.desired = b'1'
-            self.log.info(f'!!!! Asked to set Power State to {self.desired}')
+            self.log.info(f'Asked to set Power State to {self.desired}')
 
             # definitely need to restart the state machine
             self.attempts = 0
