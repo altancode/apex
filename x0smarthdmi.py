@@ -64,7 +64,7 @@ class X0SmartHDMI:
             finished, rsp = self.operation.action()
 
             if finished:
-                self.log.info(f'JVC verified HDMI is {rsp}')
+                self.log.debug(f'JVC verified HDMI is {rsp}')
 
                 # 6 - HDMI1
                 # 7 - HDMI2
@@ -112,7 +112,7 @@ class X0SmartHDMI:
             self.desired = b'6'
             if cmd == '2':
                 self.desired = b'7'
-            self.log.info(f'!!!! Asked to set HDMI State to {self.desired}')
+            self.log.info(f'Asked to set HDMI State to {self.desired}')
 
             # definitely need to restart the state machine
             self.state = ''
