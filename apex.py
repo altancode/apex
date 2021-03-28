@@ -195,6 +195,10 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
 
     jvcPoweredOn = False
 
+    # Start by asking the JVC model
+    obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
+    taskQueue.append(ApexTaskEntry(obj,('MD',b''), 'boot-model', False))
+
     while True:
         try:
             if slowdown > 0:
@@ -218,12 +222,16 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
 
                         if lastPowered != jvcPoweredOn:
                             log.info(f'JVC Power State changed to {jvcPoweredOn}')
+                    
+                    elif currentState.why == 'boot-model':
+                        if rsp:
+                            log.info(f'JVC Model is "{rsp.decode("utf-8")}"')
 
             if finished:
                 # get the next one to process
                 currentState = None
                 if len(taskQueue) > 0:
-                    log.info(f'Grabbing next task... Queue is {len(taskQueue)}')
+                    log.debug(f'Grabbing next task... Queue is {len(taskQueue)}')
                     for i,val in enumerate(taskQueue):
                         log.debug(f'   {i+1}: {val}')
 
@@ -384,7 +392,7 @@ def apexMain():
         cfg['netcontrolsecret'] = 'secret'
 
     log.info(f'Apex started...')
-    log.info(f'Using config {cfg}')
+    log.debug(f'Using config {cfg}')
 
     jvcip = x0ip.X0IP((cfg['jvcip'],cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
