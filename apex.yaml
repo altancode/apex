@@ -260,23 +260,23 @@ profiles:
 # The content below are poor examples
 #
 
-  profileTestPowerOn:
+  profileePowerOn:
   # Power On
   - op: apex-power 
     data: 'on'
     requirePowerOn: False
 
-  profileTestPowerOff:
+  profilePowerOff:
   # Power Off
   - op: apex-power 
     data: 'off'
 
-  profileTestHDMI1:
+  profileHDMI1:
   # HDMI1
   - op: apex-hdmi
     data: '1'
 
-  profileTestHDMI2:
+  profileHDMI2:
   # HDMI2
   - op: apex-hdmi
     data: '2'
