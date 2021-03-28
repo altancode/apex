@@ -19,6 +19,7 @@ import x0netcontrol
 import x0keys
 import x0smartpower
 import x0smarthdmi
+import x0delay
 import traceback
 
 ##
@@ -69,6 +70,20 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     log.debug(f'profile result {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
+
+            elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
+                data = op.get('data')
+
+                val = None
+                try:
+                    val = int(data)
+                except Exception as ex:
+                    log.error(f'Cannot convert data to integer {data} {ex}')
+
+                if val:
+                    log.debug(f'apex-delay result {val}')
+                    obj = x0delay.X0Delay(jvcip, log, cfg['timeouts'])          
+                    localQueue.append(ApexTaskEntry(obj, (val, None), 'user', op.get('requirePowerOn',True)))
 
             elif op.get('op') == 'apex-hdmi' and type(op.get('data')) == str:
                 data = op.get('data')

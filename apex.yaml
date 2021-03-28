@@ -281,7 +281,7 @@ profiles:
   - op: apex-hdmi
     data: '2'
 
-  profileMenuButton:
+  profileTestMenuButton:
   # RC code for Menu
   - op: rccode
     data: '732E'
@@ -297,18 +297,31 @@ profiles:
   - op: rccode
     data: '7302'
     
-  profile2Test:
+  profileTest2:
   - op: raw
     cmd: PMLA
     numeric: -2
 
-  profile3Test:
+  profileTest3:
   - op: raw
     cmd: PMCN
     numeric: -11
 
-  profile4Test:
+  profileTest4:
   - op: raw
     cmd: PMCN
     numeric: 0
-  
+
+  profileTestDelay:
+  - op: apex-delay
+    data: '10000'
+    requirePowerOn: False
+
+  - op: apex-delay
+    data: '5000'
+    requirePowerOn: False
+
+  - op: apex-delay
+    data: '20000'
+    requirePowerOn: False
+
