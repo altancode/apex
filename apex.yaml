@@ -260,7 +260,7 @@ profiles:
 # The content below are poor examples
 #
 
-  profileePowerOn:
+  profilePowerOn:
   # Power On
   - op: apex-power 
     data: 'on'
