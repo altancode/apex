@@ -9,10 +9,12 @@ class X0HDFuryMode:
     def action(self):
         if not self.desired:
             self.log.debug('Called with nothing to do')
-            return True
+            return (True,self.mode)
 
         self.mode = self.desired
-        self.log.info(f'HDFury mode changed to {self.mode}')
+        self.log.debug(f'HDFury mode changed to {self.mode}')
+
+        self.desired = None
 
         # we are done
         return (True,self.mode)
@@ -24,6 +26,6 @@ class X0HDFuryMode:
             self.desired = 'follow'
             if cmd == 'ignore':
                 self.desired = 'ignore'
-            self.log.info(f'Asked to set HDFuryMode {self.desired}')
+            self.log.debug(f'Asked to set HDFuryMode to {self.desired}')
 
-            self.action()
+#            self.action()
