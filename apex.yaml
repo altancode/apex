@@ -273,11 +273,15 @@ profiles:
 
   profileHDMI1:
   # HDMI1
+  - op: apex-hdfurymode
+    data: 'follow'
   - op: apex-hdmi
     data: '1'
 
   profileHDMI2:
   # HDMI2
+  - op: apex-hdfurymode
+    data: 'ignore'
   - op: apex-hdmi
     data: '2'
 
