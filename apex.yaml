@@ -329,11 +329,11 @@ profiles:
     data: '20000'
     requirePowerOn: False
 
-  profileFollow:
+  profileTestFollow:
   - op: apex-hdfurymode
     data: 'follow'
 
-  profileIgnore:
+  profileTestIgnore:
   - op: apex-hdfurymode
     data: 'ignore'
 
