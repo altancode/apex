@@ -242,7 +242,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                             if rsp == 'follow':
                                 followHDFury = True
 
-                            log.info(f'HDFuryFollowMode is now {rsp} {followHDFury}')
+                            log.info(f'HDFuryFollowMode is now {rsp} ({followHDFury})')
 
             if finished:
                 # get the next one to process
@@ -332,8 +332,8 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
             #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False))
 
         except Exception as ex:
-            log.error(f'Big Problem Exception {ex}')
-            traceback.print_exc()
+            log.error(f'Big Problem Exception {ex}',exc_info=True)
+#            traceback.print_exc()
             time.sleep(10)
 
 
