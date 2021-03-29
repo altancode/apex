@@ -20,6 +20,7 @@ import x0keys
 import x0smartpower
 import x0smarthdmi
 import x0delay
+import x0hdfurymode
 import traceback
 
 ##
@@ -70,6 +71,13 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     log.debug(f'profile result {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
+
+            elif op.get('op') == 'apex-hdfurymode' and type(op.get('data')) == str:
+                data = op.get('data')
+                log.debug(f'apex-hdfurydelay result {data}')
+                obj = x0hdfurymode.X0HDFuryMode(log)          
+                # note we default the requirePowerOn to be FALSE here
+                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', op.get('requirePowerOn',False)))
 
             elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -176,7 +184,7 @@ def addPowerCheck(inlist, jvcip, log, cfg):
     outlist = []
     for x in inlist:
         obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-        outlist.append(ApexTaskEntry(obj,('PW',b''), 'apex', False))
+        outlist.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False))
         outlist.append(x)
 
     return outlist
@@ -193,6 +201,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
     keepaliveOffset = 10
     nextKeepalive = time.time() + keepaliveOffset
 
+    followHDFury = True
     jvcPoweredOn = False
 
     # Start by asking the JVC model
@@ -210,7 +219,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 # we have a state, so we just keep working at it
                 finished,rsp = currentState.who.action()
                 if finished:
-                    if currentState.why == 'apex':
+                    if currentState.why == 'apex-checkpower':
                         log.debug(f'Finished processing task {rsp}')
                         lastPowered = jvcPoweredOn
                         if rsp == b'1' or rsp == b'3':
@@ -226,6 +235,14 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                     elif currentState.why == 'boot-model':
                         if rsp:
                             log.info(f'JVC Model is "{rsp.decode("utf-8")}"')
+
+                    elif currentState.why == 'apex-hdfurymode':
+                        if rsp:
+                            followHDFury = False
+                            if rsp == 'follow':
+                                followHDFury = True
+
+                            log.info(f'HDFuryFollowMode is now {rsp} {followHDFury}')
 
             if finished:
                 # get the next one to process
@@ -271,16 +288,19 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                     if len(rxData) >= len(example) and rxData[0:len(example)] == example:
                         pm = rxData[7:9]
                         profileName = '_APEX_PM' + misc.getPictureMode(pm)
-                        log.info(f'HDFury said to activate profile {profileName} ({pm})')
 
-                        if currentState and currentState.who == stateHDR:
-                            # as an optimization we just change the currently running state
-                            # this keeps the behavior we had prior
-                            log.debug(f'Switching stateHDR in mid flight to {pm}')
-                            stateHDR.set(pm,None)
+                        if followHDFury:
+                            log.info(f'HDFury said to activate profile {profileName} ({pm})')
+
+                            if currentState and currentState.who == stateHDR:
+                                # as an optimization we just change the currently running state
+                                # this keeps the behavior we had prior
+                                log.debug(f'Switching stateHDR in mid flight to {pm}')
+                                stateHDR.set(pm,None)
+                            else:
+                                taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, jvcip, log, cfg, stateHDR), jvcip, log, cfg)
                         else:
-                            taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, jvcip, log, cfg, stateHDR), jvcip, log, cfg)
-
+                            log.debug(f'Ignoring HDFury request to activate profile {profileName} ({pm})') 
                     else:
                         log.error(f'Ignoring HDFury {rxData} {rxData[0:len(example)]} {example}')
 
@@ -309,7 +329,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 taskQueue.append(ApexTaskEntry(obj,('off',b''), 'user', False))
 
             #     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-            #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex', False))
+            #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False))
 
         except Exception as ex:
             log.error(f'Big Problem Exception {ex}')
@@ -366,9 +386,11 @@ def apexMain():
 
     # read config
     with open(cfgName) as file:
-        cfg = yaml.full_load(file)
-
-    print(cfg['profiles'])
+        try:
+            cfg = yaml.full_load(file)
+        except Exception as ex:
+            log.error(f'Unable to parse YAML configuration {ex}', exc_info=True)
+            raise ex
 
     if not 'timeouts' in cfg:
         cfg['timeouts'] = {}

@@ -70,7 +70,7 @@ class X0Delay:
             self.log.error(f'Already set delay to {self.desired} ms')
         else:
             self.desired = int(cmd)
-            self.log.info(f'Asked to set dekay {self.desired} ms')
+            self.log.info(f'Asked to set delay {self.desired} ms')
 
             # definitely need to restart the state machine
             self.state = ''
