@@ -59,7 +59,7 @@ Apex may be right of you if...
 * Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
 * You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
 * You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
-* Your JVC does not reliabily turn on or off and you'd like rock solid behavior?
+* Your JVC does not reliably turn on or off and you'd like rock solid behavior?
 * You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
 * Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
 
@@ -112,7 +112,7 @@ Profiles are stored in the apex.yaml file.  All profiles, whether custom or core
 profiles:
 # Apex Core Profiles
 # Profile names beginning with _APEX_ have specific meaning and should not be removed
-# However, you are more than welcone to change the contents of the profile
+# However, you are more than welcome to change the contents of the profile
 
   _APEX_PMFilm:
   - op: apex-pm
@@ -123,7 +123,7 @@ profiles:
     data: '01'
 ```
 
-All profiles follow a standard format.  First there is the profile name.   This is followed by one more more operations ("op") and repsective operaiton
+All profiles follow a standard format.  First there is the profile name.   This is followed by one or more operations ("op") and respective operation
 parameters.
 
 By default, Apex will not send profile operations to the JVC when the JVC is powered off.   This is because the JVC protocol is rather basic and does not
@@ -147,7 +147,7 @@ parameter to picture mode names.
 ```
 
 ## "apex-hdmi" operation
-Special sauce?   Yes.   Using the operaiton apex-hdmi avoids activating a HDMI input if it's already active.   The data parameter 
+Special sauce?   Yes.   Using the operation apex-hdmi avoids activating a HDMI input if it's already active.   The data parameter 
 is '1' for HDMI 1 and '2' for HDMI2.  The optional parameter "requirePowerOn" is supported.
 
 ```
@@ -160,7 +160,7 @@ is '1' for HDMI 1 and '2' for HDMI2.  The optional parameter "requirePowerOn" is
 ## "apex-power" operation
 More Apex special sauce, the apex-power operation not only tells the JVC to turn on or off, but ensures that it does turn on or off.
 Using the raw commands you may find the JVC says it turned off but actually does not.   Because of this, it is recommended that
-apex-power be used for all power on/off operations.   When using apex-poower, a "data" field must exist.   This indicates whether to 
+apex-power be used for all power on/off operations.   When using apex-power, a "data" field must exist.   This indicates whether to 
 power on or power off the JVC.  The optional parameter "requirePowerOn" is supported.
 
 ```
@@ -175,13 +175,33 @@ power on or power off the JVC.  The optional parameter "requirePowerOn" is suppo
     data: 'off'
 ```
 
+## "apex-delay" operation
+This is for use under special circumstances.  The apex-delay operation causes Apex to wait (aka delay) the specified amount of time before
+processing the next operation in the profile.  While this can be used however desired, it was added because the JVC responds that it has
+completed restoring lens memory before the lens has reached the final spot.
+
+When using apex-delay, a "data" field must exist.   This indicates the number of milliseconds to delay.
+The optional parameter "requirePowerOn" is supported.  The example below specifies a 10 second delay.
+
+```
+  - op: apex-delay
+    data: '10000'
+```
+
+## "apex-hdfurymode" operation
+The apex-hdfurymode operation tells Apex whether it should "follow" or "ignore" HDR modes specified by an HD Fury device.
+When set to "follow", Apex will act upon HD Fury HDR modes and when set to "ignore", Apex will ignore HD Fury HDR modes.
+When using apex-hdfurymode, a "data" field must exist.  It must be set to either "follow" or "ignore".   
+The optional parameter "requirePowerOn" is supported.  However, the default is set to False (meaning this command is 
+process regardless of the JVC power state).
+
 ## "raw" operation
-The raw operatiobn mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
+The raw operation mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
 a numeric field.   Either one can be used, the two options exist to make your life easier.  If numeric is specified, Apex takes the
 specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
 data to be specified. The optional parameter "requirePowerOn" is supported.
 
-Here is an example of a raw command with numberic
+Here is an example of a raw command with numeric
 
 ```
   # set the aperture to -10
@@ -217,7 +237,7 @@ cases you can make those work by simply adding 73 to the front (resulting in 732
 Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
 If you want to send "Code B" commands, replace the 73 with 63.
 
-## Bringing it Togher
+## Bringing it Together
 As stated, profiles can have multiple operations.  Below is an example profile called "profileExample" that combines some of the
 operations mentioned above.
 
@@ -263,11 +283,11 @@ python3 apexcmd.py --profile profileHDMI1
 ```
 
 You can override any of the fields in the config with the command line options --ip, --port and --secret.   If
-you do not want to use a config file at all, you can specifiy the --noconfigfile.
+you do not want to use a config file at all, you can specify the --noconfigfile.
 
 
 # IR Key Support
-Apex allows a profile to be activated when an IR Key is recevied.   Currently Apex supports IR key functionality when
+Apex allows a profile to be activated when an IR Key is received.   Currently Apex supports IR key functionality when
 running on Linux systems.   The IR functionality of the system must be setup and operational before Apex can know
 about IR keypresses.  This setup is beyond the scope of this document (but perhaps I'll add info later).
 
