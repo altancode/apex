@@ -7,7 +7,7 @@ Apex is a powerful tool to control your JVC projector.   Apex offers several fea
 
 # Releases
 
-The release history is located [history.md]
+The release history is located at [History.md](history.md)
 
 # Apex HDR Experience Optimization
 
