@@ -181,9 +181,10 @@ processing the next operation in the profile.  While this can be used however de
 completed restoring lens memory before the lens has reached the final spot.
 
 When using apex-delay, a "data" field must exist.   This indicates the number of milliseconds to delay.
-The optional parameter "requirePowerOn" is supported.  The example below specifies a 10 second delay.
+The optional parameter "requirePowerOn" is supported.  
 
 ```
+  # delay 10 seconds
   - op: apex-delay
     data: '10000'
 ```
@@ -192,8 +193,20 @@ The optional parameter "requirePowerOn" is supported.  The example below specifi
 The apex-hdfurymode operation tells Apex whether it should "follow" or "ignore" HDR modes specified by an HD Fury device.
 When set to "follow", Apex will act upon HD Fury HDR modes and when set to "ignore", Apex will ignore HD Fury HDR modes.
 When using apex-hdfurymode, a "data" field must exist.  It must be set to either "follow" or "ignore".   
+
 The optional parameter "requirePowerOn" is supported.  However, the default is set to False (meaning this command is 
 process regardless of the JVC power state).
+
+```
+  # Apex will use (aka use) the HDR info provided from HD Fury
+  - op: apex-hdfurymode
+    data: 'follow'
+```
+```
+  # Apex will ignore the HDR info provided from HD Fury
+  - op: apex-hdfurymode
+    data: 'ignore'
+```
 
 ## "raw" operation
 The raw operation mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
