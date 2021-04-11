@@ -134,7 +134,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 except Exception as ex:
                     log.error(f'Cannot convert data to binary {data} {ex}')
 
-                if b:
+                if b != None:
                     log.debug(f'profile result {cmd} {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                     localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', op.get('requirePowerOn',True)))
