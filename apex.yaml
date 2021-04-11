@@ -260,30 +260,59 @@ profiles:
 # The content below are poor examples
 #
 
+  # Apex Smart Power On
   profilePowerOn:
-  # Power On
   - op: apex-power 
     data: 'on'
     requirePowerOn: False
 
+  # Apex Smart Power Off
   profilePowerOff:
-  # Power Off
   - op: apex-power 
     data: 'off'
 
+  # Select HDMI1 and use HDFury follow mode
   profileHDMI1:
-  # HDMI1
   - op: apex-hdfurymode
     data: 'follow'
   - op: apex-hdmi
     data: '1'
 
+  # Select HDMI2 and use HDFury ignore mode
   profileHDMI2:
-  # HDMI2
   - op: apex-hdfurymode
     data: 'ignore'
   - op: apex-hdmi
     data: '2'
+
+  # Move lens one notch upward
+  profileLensNotchUp:
+  - op: raw
+    cmd: IN1U
+    data: ''
+
+  # Move lens one notch downward
+  profileLensNotchDown:
+  - op: raw
+    cmd: IN1D
+    data: ''
+
+  # Move lens one notch left
+  profileLensNotchLeft:
+  - op: raw
+    cmd: IN1L
+    data: ''
+
+  # Move lens one notch right
+  profileLensNotchRight:
+  - op: raw
+    cmd: IN1R
+    data: ''
+
+#
+# Some Test Profiles
+# These are also (poor) examples
+#
 
   profileTestMenuButton:
   # RC code for Menu
