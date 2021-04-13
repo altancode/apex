@@ -19,7 +19,6 @@ class X0Delay:
         self.comm = inComm
         self.state = ''
         self.timeout = 0
-        self.opAckOffset = timeoutConfig['jvcOpAckProfile']
         self.opcmd = b''
         self.timeoutResend = 0
         self.opAckResend = 1

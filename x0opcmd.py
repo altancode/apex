@@ -21,7 +21,7 @@ class X0OpCmd:
         self.comm = inComm
         self.state = ''
         self.timeout = 0
-        self.opAckOffset = timeoutConfig['jvcOpAckProfile']
+        self.opAckOffset = timeoutConfig['jvcOpAckTimeout']
         self.opcmd = b''
         self.timeoutResend = 0
         self.opAckResend = 1

@@ -264,7 +264,6 @@ profiles:
   profilePowerOn:
   - op: apex-power 
     data: 'on'
-    requirePowerOn: False
 
   # Apex Smart Power Off
   profilePowerOff:
