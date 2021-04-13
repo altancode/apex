@@ -58,14 +58,16 @@ class X0SmartPower:
             self.operation = x0refcmd.X0RefCmd(self.jvcip, self.log, self.cfg)
             self.operation.set('PW',b'')
             self.state = 'validating'
+            self.jvcError = False
 
         if self.state == 'restart':
             self.log.debug(f'State "{self.state}" {self.attempts}')
 
-            if self.attempts > 2:
+            if self.attempts > 3:
                 self.log.warning(f'Too many attempts ({self.attempts}) to set power correctly.   Giving up.')
                 self.desired = None
                 self.state = ''
+                self.jvcError = False
             else:
                 self.log.info(f'Telling JVC to set power state to {self.desired}')
 
@@ -107,7 +109,8 @@ class X0SmartPower:
                     # 0 - standby
                     # 1 - lamp on
                     # 2 - cooling
-                    # 3-  reserved (warming up?)
+                    # 3 - reserved (warming up?)
+                    # 4 - error
 
                     # if (self.desired == b'1' and rsp == b'3') or \
                     #     (self.desired == b'0' and rsp == b'2'):
@@ -128,10 +131,25 @@ class X0SmartPower:
                             self.log.info(f'Power state is as expected {self.desired} {rsp}')
                             self.state = ''
                             self.desired = None
+                            self.jvcError = False
                         else:
-                            self.log.info(f'Inconsistent Power State (will try again) {self.desired} {rsp}')
-                            self.state = 'delay-restart'
-                            self.waitUntil = time.time()
+
+                            if self.jvcError:
+                                # when in the error state it appears the JVC keeps returning the error state
+                                # at least until the power operation is complete (which can take 30+ seconds)
+                                # so we don't want to keep trying to power on
+                                self.log.warning(f'JVC reporting power error state.   Hoping for the best... {rsp}')
+                            else:
+
+                                self.log.info(f'Inconsistent Power State (will try again) {self.desired} {rsp}')
+                                self.state = 'delay-restart'
+
+                                if rsp == b'4':
+                                    self.jvcError = True
+                                    self.waitUntil = time.time() + 20
+                                else:
+                                    self.waitUntil = time.time()
+
 
         elif self.state == 'delay-validation':
             if time.time() > self.waitValidation:
@@ -173,4 +191,5 @@ class X0SmartPower:
             # definitely need to restart the state machine
             self.attempts = 0
             self.state = ''
+            self.jvcError = False
             self.action()
