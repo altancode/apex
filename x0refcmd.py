@@ -153,7 +153,7 @@ class X0RefCmd:
             log.warning(f'!!!! Already sending command {combined}')
         else:
             self.desired = combined
-            log.info(f'Asked to send reference command {combined}')
+            log.debug(f'Asked to send reference command {combined}')
 
             # definitely need to restart the state machine
             self.state = ''
