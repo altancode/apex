@@ -401,7 +401,7 @@ def apexMain():
         logFile = args.logfile
 
     # now that we have the log file name, we setup file logging
-    handler = RotatingFileHandler(logFile, maxBytes=100*1024, backupCount=3)
+    handler = RotatingFileHandler(logFile, maxBytes=500*1024, backupCount=3)
     handler.setFormatter(formatter)
     log.addHandler(handler)
 
