@@ -281,7 +281,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 # get the next one to process
                 currentState = None
                 if len(taskQueue) > 0:
-                    log.debug(f'Grabbing next task... Queue is {len(taskQueue)}')
+                    log.info(f'Grabbing next operation... Queue is {len(taskQueue)}')
                     for i,val in enumerate(taskQueue):
                         log.debug(f'   {i+1}: {val}')
 
