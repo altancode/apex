@@ -135,10 +135,10 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
             elif op.get('op') == 'apex-power' and type(op.get('data')) == str:
                 data = op.get('data')
                 cmd = 'off'
-                reqPower = POWER_POWERON
+#                reqPower = POWER_POWERON
                 if data == 'on':
                     cmd = 'on'
-                    reqPower = POWER_POWEROFF
+#                    reqPower = POWER_POWEROFF
 
                 log.debug(f'apex-power result {cmd}')
                 obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])          
