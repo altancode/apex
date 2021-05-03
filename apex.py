@@ -22,6 +22,13 @@ import x0smarthdmi
 import x0delay
 import x0hdfurymode
 import traceback
+from typing import List
+
+## Constants
+
+POWER_POWERANY = 0
+POWER_POWERON = 1
+POWER_POWEROFF = 2
 
 ##
 ## Classes
@@ -30,14 +37,14 @@ import traceback
 class ApexTaskEntry():
     """Class to hold values"""
 
-    def __init__(self, who, what, why, requirePowerOn):
+    def __init__(self, who, what, why, requirePower: int):
         self.who = who
         self.what = what
         self.why = why
-        self.requirePowerOn = requirePowerOn
+        self.requirePower = requirePower
 
     def __str__(self):
-        return f'ApexTaskEntry {self.who} {self.what} {self.why} {self.requirePowerOn}'
+        return f'ApexTaskEntry {self.who} {self.what} {self.why} {self.requirePower}'
 
    
 ##
@@ -49,6 +56,28 @@ log = None
 ##
 ## code
 ##
+
+def power2Str(pow):
+    if pow == POWER_POWERANY:
+        return 'POWER ANY'
+    
+    if pow == POWER_POWERON:
+        return 'POWER ON'
+    
+    if pow == POWER_POWEROFF:
+        return 'POWER OFF'
+
+    return 'POWER UNKNOWN'
+
+def convertPowerReq(op, defaultIfMissing=True):
+
+    reqPowerOn = op.get('requirePowerOn',True)
+    
+    r = POWER_POWERANY
+    if reqPowerOn:
+        r = POWER_POWERON
+
+    return r
 
 def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
     """takes a profile name and queues the associated commands"""
@@ -70,14 +99,14 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 if b:
                     log.debug(f'profile result {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                    localQueue.append(ApexTaskEntry(obj,('RC',b), 'user', op.get('requirePowerOn',True)))
+                    localQueue.append( ApexTaskEntry(obj,('RC',b), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'apex-hdfurymode' and type(op.get('data')) == str:
                 data = op.get('data')
                 log.debug(f'apex-hdfurydelay result {data}')
                 obj = x0hdfurymode.X0HDFuryMode(log)          
                 # note we default the requirePowerOn to be FALSE here
-                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', op.get('requirePowerOn',False)))
+                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False) ))
 
             elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -91,7 +120,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 if val:
                     log.debug(f'apex-delay result {val}')
                     obj = x0delay.X0Delay(jvcip, log, cfg['timeouts'])          
-                    localQueue.append(ApexTaskEntry(obj, (val, None), 'user', op.get('requirePowerOn',True)))
+                    localQueue.append(ApexTaskEntry(obj, (val, None), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'apex-hdmi' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -101,17 +130,20 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
 
                 log.debug(f'apex-hdmi result {cmd}')
                 obj = x0smarthdmi.X0SmartHDMI(jvcip, log, cfg['timeouts'])          
-                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', op.get('requirePowerOn',True)))
+                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'apex-power' and type(op.get('data')) == str:
                 data = op.get('data')
                 cmd = 'off'
+#                reqPower = POWER_POWERON
                 if data == 'on':
                     cmd = 'on'
+#                    reqPower = POWER_POWEROFF
 
                 log.debug(f'apex-power result {cmd}')
                 obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])          
-                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', op.get('requirePowerOn',True)))
+                # localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', reqPower ))
+                localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', POWER_POWERANY ))
             
             elif op.get('op') == 'apex-pm' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -123,7 +155,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
 
                 if b:
                     log.debug(f'apex-pm profile result {b}')
-                    localQueue.append(ApexTaskEntry(stateHDR, (b, None), 'user', op.get('requirePowerOn',True)))
+                    localQueue.append(ApexTaskEntry(stateHDR, (b, None), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                 cmd = op.get('cmd')
@@ -137,7 +169,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 if b != None:
                     log.debug(f'profile result {cmd} {b}')
                     obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', op.get('requirePowerOn',True)))
+                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('numeric')) == int:
                 log.debug(f'inside number with {op}')
@@ -157,7 +189,7 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                     if b:
                         log.debug(f'profile result {cmd} {b}')
                         obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', op.get('requirePowerOn',True)))
+                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
 
             else:
                 log.warning(f'Cannot parse {op}')
@@ -202,7 +234,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
     nextKeepalive = time.time() + keepaliveOffset
 
     followHDFury = True
-    jvcPoweredOn = False
+    jvcPowerState = POWER_POWEROFF
 
     # Start by asking the JVC model
     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
@@ -221,16 +253,17 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 if finished:
                     if currentState.why == 'apex-checkpower':
                         log.debug(f'Finished processing task {rsp}')
-                        lastPowered = jvcPoweredOn
-                        if rsp == b'1' or rsp == b'3':
+                        lastPowered = jvcPowerState
+                        # if rsp == b'1' or rsp == b'3':
+                        if rsp == b'1':
                             # 1 is on
                             # 3 is reserved but appears to mean "warming up"
-                            jvcPoweredOn = True
+                            jvcPowerState = POWER_POWERON
                         else: 
-                            jvcPoweredOn = False
+                            jvcPowerState = POWER_POWEROFF
 
-                        if lastPowered != jvcPoweredOn:
-                            log.info(f'JVC Power State changed to {jvcPoweredOn}')
+                        if lastPowered != jvcPowerState:
+                            log.info(f'JVC Power State changed to {power2Str(jvcPowerState)} {jvcPowerState}')
                     
                     elif currentState.why == 'boot-model':
                         if rsp:
@@ -248,14 +281,15 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 # get the next one to process
                 currentState = None
                 if len(taskQueue) > 0:
-                    log.debug(f'Grabbing next task... Queue is {len(taskQueue)}')
+                    log.info(f'Grabbing next operation... Queue is {len(taskQueue)}')
                     for i,val in enumerate(taskQueue):
                         log.debug(f'   {i+1}: {val}')
 
                     next = taskQueue.pop(0)
 
-                    if (not jvcPoweredOn) and next.requirePowerOn:
-                        log.info(f'Skipping because of jvcPoweredOn is {jvcPoweredOn} and {next}')
+                    if ( (jvcPowerState == POWER_POWEROFF) and (next.requirePower == POWER_POWERON) ) or \
+                        ((jvcPowerState == POWER_POWERON) and (next.requirePower == POWER_POWEROFF)):
+                        log.info(f'Not performing operation because jvcPowerState is {jvcPowerState} and {next}')
                     else:
                         currentState = next
                         log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
@@ -367,7 +401,7 @@ def apexMain():
         logFile = args.logfile
 
     # now that we have the log file name, we setup file logging
-    handler = RotatingFileHandler(logFile, maxBytes=100*1024, backupCount=3)
+    handler = RotatingFileHandler(logFile, maxBytes=500*1024, backupCount=3)
     handler.setFormatter(formatter)
     log.addHandler(handler)
 
@@ -394,12 +428,27 @@ def apexMain():
 
     if not 'timeouts' in cfg:
         cfg['timeouts'] = {}
+
+    if not 'hdfuryRead' in cfg['timeouts']:
         cfg['timeouts']['hdfuryRead'] = 0.1
+
+    if not 'jvcIP' in cfg['timeouts']:
         cfg['timeouts']['jvcIP'] = 0.25
+
+    if not 'jvcRefAck' in cfg['timeouts']:
         cfg['timeouts']['jvcRefAck'] = 0.25
+
+    if not 'jvcDefault' in cfg['timeouts']:
         cfg['timeouts']['jvcDefault'] = 2
+
+    if not 'jvcOpAck' in cfg['timeouts']:
         cfg['timeouts']['jvcOpAck'] = 30
-        cfg['timeouts']['jvcOpAckProfile'] = 60
+ 
+    if not 'jvcOpAckTimeout' in cfg['timeouts']:
+        cfg['timeouts']['jvcOpAckTimeout'] = 60
+
+    if not 'jvcPowerTimeout' in cfg['timeouts']:
+        cfg['timeouts']['jvcPowerTimeout'] = 120
 
     if not 'closeOnComplete' in cfg:
         cfg['closeOnComplete'] = False

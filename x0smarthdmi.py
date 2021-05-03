@@ -27,7 +27,6 @@ class X0SmartHDMI:
         self.jvcip = inComm
         self.state = ''
         self.timeout = 0
-        self.opAckOffset = timeoutConfig['jvcOpAckProfile']
         self.operation = None
 
 
