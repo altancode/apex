@@ -21,6 +21,7 @@ import x0smartpower
 import x0smarthdmi
 import x0delay
 import x0hdfurymode
+import x0gammadstate
 import traceback
 from typing import List
 
@@ -71,7 +72,8 @@ def power2Str(pow):
 
 def convertPowerReq(op, defaultIfMissing=True):
 
-    reqPowerOn = op.get('requirePowerOn',True)
+#    reqPowerOn = op.get('requirePowerOn',True)
+    reqPowerOn = op.get('requirePowerOn',defaultIfMissing)
     
     r = POWER_POWERANY
     if reqPowerOn:
@@ -107,6 +109,13 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 obj = x0hdfurymode.X0HDFuryMode(log)          
                 # note we default the requirePowerOn to be FALSE here
                 localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False) ))
+
+            elif op.get('op') == 'apex-ongammad' and type(op.get('data')) == str:
+                data = op.get('data')
+                log.debug(f'apex-ongammad result {data}')
+                obj = x0gammadstate.X0GammaDState(log)          
+                # note we default the requirePowerOn to be FALSE here
+                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-ongammadstate', convertPowerReq(op, False) ))
 
             elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -225,6 +234,10 @@ def addPowerCheck(inlist, jvcip, log, cfg):
 def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
+    watchGammaD = False
+    nextGammaDTime = 0
+    gammaDProfile = ''
+
     testOnetime = False
     taskQueue = []
     currentState = None
@@ -277,6 +290,29 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
 
                             log.info(f'HDFuryFollowMode is now {rsp} ({followHDFury})')
 
+                    elif currentState.why == 'apex-ongammadstate':
+                        if rsp != None:
+                            if rsp == '':
+                                log.info(f'apex-ongammad disabled {rsp}')
+                                watchGammaD = False
+                                nextGammaDTime = 0
+                                gammaDProfile = ''
+                            else:
+                                log.info(f'apex-ongammad enabled with profile {rsp}')
+                                watchGammaD = True
+                                nextGammaDTime = 0
+                                gammaDProfile = rsp
+
+
+                    elif currentState.why == 'apex-gammad':
+                        if rsp:
+                            if rsp == b'7':
+                                # it is gamma d
+                                # look up the profile and add the commands
+                                log.info(f'JVC is in Gamma D!  Adding profile {gammaDProfile} to queue')
+                                taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, jvcip, log, cfg, stateHDR)
+
+
             if finished:
                 # get the next one to process
                 currentState = None
@@ -299,17 +335,26 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 # empty stuff we don't want, such as stale responses or keep alive ack
                 jvcip.read(emptyIt = True)
 
-                # check if keepalive time
-                if time.time() > nextKeepalive:
-                    # it is!
-                    cmd = b'!\x89\x01\x00\x00\n'
-                    if chatty:
-                        log.debug(f'Sending keep alive {cmd}')
-                    ok = jvcip.send(cmd)
-                    if not ok:
-                        log.warning(f'Unable to send keep alive')
-            
-                    nextKeepalive = time.time() + keepaliveOffset
+                # maybe schedule a gammad check?
+                if watchGammaD and time.time() > nextGammaDTime:
+                    log.debug(f'adding gammad check to queue')
+                    obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
+                    taskQueue.append(ApexTaskEntry(obj,('PM',b'GT'), 'apex-gammad', True))
+
+                    # this is the soonest it can happen again, but it could be later if the queue has multiple enttries
+                    nextGammaDTime = time.time() + 1
+                else:                
+                    # check if keepalive time
+                    if time.time() > nextKeepalive:
+                        # it is!
+                        cmd = b'!\x89\x01\x00\x00\n'
+                        if chatty:
+                            log.debug(f'Sending keep alive {cmd}')
+                        ok = jvcip.send(cmd)
+                        if not ok:
+                            log.warning(f'Unable to send keep alive')
+                
+                        nextKeepalive = time.time() + keepaliveOffset
 
             if vtxser:
                 rxData = vtxser.read()
