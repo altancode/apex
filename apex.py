@@ -513,12 +513,17 @@ def apexMain():
     jvcip = x0ip.X0IP((cfg['jvcip'],cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
 
-    vtxser = x0serial.X0Serial(cfg['hdfury'], log, cfg['timeouts'])
-    try:
-        vtxser.connect()
-    except Exception as ex:
-        log.error(f'Exception while accessing serial port ("{ex}"')
-        return
+    vtxser = None
+    if cfg.get('hdfury',None):
+        vtxser = x0serial.X0Serial(cfg['hdfury'], log, cfg['timeouts'])
+        try:
+            vtxser.connect()
+            log.info(f"HDFury device at {cfg['hdfury']}")
+        except Exception as ex:
+            log.error(f'Exception while accessing serial port ("{ex}"')
+            return
+    else:
+        log.info('No HDFury device configured!')
 
     state = x0state.X0State(jvcip, log, cfg['timeouts'], cfg['closeOnComplete'])
 
