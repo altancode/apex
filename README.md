@@ -226,6 +226,9 @@ with a profile.
     data: ''
 ```
 
+If the apex-ongammad operation os used, it is very important that the specified profile performs
+actions that cause the gamma table to change.   If not, Apex will keep noticing Gamma D and keep
+performing the operations in the profile over and over.
 
 ## "raw" operation
 The raw operation mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
