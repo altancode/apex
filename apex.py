@@ -304,7 +304,6 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                                 nextGammaDTime = 0
                                 gammaDProfile = rsp
 
-
                     elif currentState.why == 'apex-gammadcheck':
                         if rsp:
                             if rsp == b'7':
@@ -312,7 +311,6 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                                 # look up the profile and add the commands
                                 log.info(f'Noticed Gamma D!  Adding profile "{gammaDProfile}"" to queue')
                                 taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, jvcip, log, cfg, stateHDR)
-
 
             if finished:
                 # get the next one to process
@@ -326,7 +324,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
 
                     if ( (jvcPowerState == POWER_POWEROFF) and (next.requirePower == POWER_POWERON) ) or \
                         ((jvcPowerState == POWER_POWERON) and (next.requirePower == POWER_POWEROFF)):
-                        log.info(f'Not performing operation because jvcPowerState is {jvcPowerState} and {next}')
+                        log.debug(f'Not performing operation because jvcPowerState is {jvcPowerState} and {next}')
                     else:
                         currentState = next
                         log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
