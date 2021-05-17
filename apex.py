@@ -111,11 +111,12 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
                 localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False) ))
 
             elif op.get('op') == 'apex-ongammad' and type(op.get('data')) == str:
+                # this is the command that appears in the profile
                 data = op.get('data')
                 log.debug(f'apex-ongammad result {data}')
                 obj = x0gammadstate.X0GammaDState(log)          
                 # note we default the requirePowerOn to be FALSE here
-                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-ongammadstate', convertPowerReq(op, False) ))
+                localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-ongammad', convertPowerReq(op, False) ))
 
             elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
                 data = op.get('data')
@@ -290,7 +291,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
 
                             log.info(f'HDFuryFollowMode is now {rsp} ({followHDFury})')
 
-                    elif currentState.why == 'apex-ongammadstate':
+                    elif currentState.why == 'apex-ongammad':
                         if rsp != None:
                             if rsp == '':
                                 log.info(f'apex-ongammad disabled {rsp}')
@@ -298,18 +299,18 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                                 nextGammaDTime = 0
                                 gammaDProfile = ''
                             else:
-                                log.info(f'apex-ongammad enabled with profile {rsp}')
+                                log.info(f'apex-ongammad enabled with profile "{rsp}"')
                                 watchGammaD = True
                                 nextGammaDTime = 0
                                 gammaDProfile = rsp
 
 
-                    elif currentState.why == 'apex-gammad':
+                    elif currentState.why == 'apex-gammadcheck':
                         if rsp:
                             if rsp == b'7':
                                 # it is gamma d
                                 # look up the profile and add the commands
-                                log.info(f'JVC is in Gamma D!  Adding profile {gammaDProfile} to queue')
+                                log.info(f'Noticed Gamma D!  Adding profile "{gammaDProfile}"" to queue')
                                 taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, jvcip, log, cfg, stateHDR)
 
 
@@ -317,7 +318,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 # get the next one to process
                 currentState = None
                 if len(taskQueue) > 0:
-                    log.info(f'Grabbing next operation... Queue is {len(taskQueue)}')
+                    log.debug(f'Grabbing next operation... Queue is {len(taskQueue)}')
                     for i,val in enumerate(taskQueue):
                         log.debug(f'   {i+1}: {val}')
 
@@ -339,7 +340,7 @@ def processLoop(cfg, jvcip, vtxser, stateHDR, slowdown, netcontrol, keyinput, pr
                 if watchGammaD and time.time() > nextGammaDTime:
                     log.debug(f'adding gammad check to queue')
                     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-                    taskQueue.append(ApexTaskEntry(obj,('PM',b'GT'), 'apex-gammad', True))
+                    taskQueue.append(ApexTaskEntry(obj,('PM',b'GT'), 'apex-gammadcheck', True))
 
                     # this is the soonest it can happen again, but it could be later if the queue has multiple enttries
                     nextGammaDTime = time.time() + 1

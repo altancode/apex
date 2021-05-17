@@ -5,9 +5,9 @@ Apex is a powerful tool to control your JVC projector.   Apex offers several fea
 1. Apex optimizes the JVC + HD Fury HDR experience.
 2. Apex allows deep control of the JVC using both network connectivity and IR
 
-# Releases
+# What's New?
 
-The release history is located at [History.md](history.md)
+The latest release adds support for detecting Gamma D and automatically switching to a specified profile.
 
 # Apex HDR Experience Optimization
 
@@ -207,6 +207,25 @@ process regardless of the JVC power state).
   - op: apex-hdfurymode
     data: 'ignore'
 ```
+
+## "apex-ongammad" operation
+The apex-ongammad operation tells Apex to watch the JVC's gamma table and, should Gamma D be detected,
+perform the commands specified in a profile.   The profile is specified in the operation's data
+parameter.   "On Gamma D" detection defaults to off and is enabled by performing the apex-ongammad operation
+with a profile.
+
+```
+  # this example shows enabling the On Gamma D functionality and performing profile "profileTestSelectGammaCustom1" when detected
+  - op: apex-ongammad
+    data: 'profileTestSelectGammaCustom1'
+```
+
+```
+  # this example shows disabling the On Gamma D functionality
+  - op: apex-ongammad
+    data: ''
+```
+
 
 ## "raw" operation
 The raw operation mode allows any JVC control command to be executed.   Raw requires a "cmd" field and then either a "data" field or
