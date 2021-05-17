@@ -8,6 +8,7 @@ Apex is a powerful tool to control your JVC projector.   Apex offers several fea
 # What's New?
 
 The latest release adds support for detecting Gamma D and automatically switching to a specified profile.
+Additionally, this release makes it possible to run Apex without a USB serial port.
 
 # Apex HDR Experience Optimization
 
@@ -84,6 +85,10 @@ a HDFury "delay" setting of 20 seconds.
 # Apex Setup
 
 Apex is written in Python 3.  There are a million ways to run python code.  Below is one simple approach.  
+
+Note: the following instructions assume Apex is running with a HDFury device and a USB serial port.
+If you want to run Apex without a USB serial port (and therefore not use any of the HDFury optimizations),
+you need to comment out the "hdfury" line in the apex.yaml file.
 
 1. Create a directory somewhere called apex
 1. Retrieve Apex from the Repo
