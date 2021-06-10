@@ -344,6 +344,11 @@ profiles:
     cmd: PMCN
     numeric: 0
 
+  profileTestSmallDelay:
+  - op: apex-delay
+    data: '5000'
+    requirePowerOn: False
+
   profileTestDelay:
   - op: apex-delay
     data: '10000'
@@ -365,3 +370,20 @@ profiles:
   - op: apex-hdfurymode
     data: 'ignore'
 
+  profileTestOnGammaDEnable:
+  - op: apex-ongammad
+    data: 'profileTestSelectGammaCustom1'
+
+  profileTestOnGammaDDisable:
+  - op: apex-ongammad
+    data: ''
+
+  profileTestSelectGammaD:
+  - op: raw
+    cmd: PMGT
+    data: '7'
+
+  profileTestSelectGammaCustom1:
+  - op: raw
+    cmd: PMGT
+    data: '4'
