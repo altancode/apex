@@ -7,9 +7,9 @@ pmLookup = {
     b'01': 'Cinema',
     b'02': 'Animation',
     b'03': 'Natural',
-    b'04': 'HDR10'
+    b'04': 'HDR10',
     b'06': 'THX',
-    b'0B': 'FrameAdaptHDR'
+    b'0B': 'FrameAdaptHDR',
     b'0C': 'User1',
     b'0D': 'User2',
     b'0E': 'User3',
