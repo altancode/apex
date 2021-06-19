@@ -47,9 +47,17 @@ profiles:
   - op: apex-pm
     data: '03'
 
+  _APEX_PMHDR10:
+  - op: apex-pm
+    data: '04'
+
   _APEX_PMTHX:
   - op: apex-pm
     data: '06'
+
+  _APEX_PMFrameAdaptHDR:
+  - op: apex-pm
+    data: '0B'
 
   _APEX_PMUser1:
   - op: apex-pm
@@ -75,6 +83,14 @@ profiles:
   - op: apex-pm
     data: '11'
 
+  _APEX_PMHLG:
+  - op: apex-pm
+    data: '14'
+
+  _APEX_PMPanaPQ:
+  - op: apex-pm
+    data: '16'
+    
 #
 # Sample Profile with potentially useful commands
 # Do not activate this profile or else it is going to run a ton of commands
