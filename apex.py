@@ -2,6 +2,7 @@
 ## imports
 ##
 
+import copy
 import argparse
 import time
 import yaml
@@ -170,6 +171,13 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                 cmd = op.get('cmd')
                 data = op.get('data')
+                timeout = op.get('timeout', None)
+
+                updatedTimeouts = copy.deepcopy(cfg['timeouts'])
+                if timeout:
+                    updatedTimeouts['jvcOpAckTimeout'] = int(timeout)/1000
+                    log.debug(f"using timeout of {updatedTimeouts['jvcOpAckTimeout']} for {cmd} {data}")
+
                 b = None
                 try:
                     b = bytes(data,'utf-8')
@@ -178,7 +186,8 @@ def singleProfile2cmd(pname, profiles, jvcip, log, cfg, stateHDR):
 
                 if b != None:
                     log.debug(f'profile result {cmd} {b}')
-                    obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
+#                    obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
+                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
                     localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
 
             elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('numeric')) == int:

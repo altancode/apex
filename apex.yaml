@@ -403,3 +403,10 @@ profiles:
   - op: raw
     cmd: PMGT
     data: '4'
+
+  profileTestRawTimeout:
+  - op: raw
+    cmd: FAKE
+    data: '6'
+    timeout: 1000
+    requirePowerOn: False
