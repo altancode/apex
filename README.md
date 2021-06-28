@@ -7,8 +7,7 @@ Apex is a powerful tool to control your JVC projector.   Apex offers several fea
 
 # What's New?
 
-The latest release adds support for detecting Gamma D and automatically switching to a specified profile.
-Additionally, this release makes it possible to run Apex without a USB serial port.
+The latest release supports picture modes from more recent JVC projectors as well as adding an optional timeout for RAW operations.
 
 # Apex HDR Experience Optimization
 
