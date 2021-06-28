@@ -241,6 +241,12 @@ a numeric field.   Either one can be used, the two options exist to make your li
 specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
 data to be specified. The optional parameter "requirePowerOn" is supported.
 
+The raw operation also supports an optional "timeout" parameter.  This paramter should not be used unless there is a very specific reason.
+When not specified, Apex uses the default Apex algorithm to optimize the JVC's behavior.   However, if there's a unique scenario where 
+the JVC performs poorly with this default behavior, a timeout (in milliseconds) can be specified.  When the timeout is specified, Apex will stop attempting to have the JVC
+perform the specified command after the specified timeout's duration.   Keep in mind that while a short timeout may seem appropriate at first,
+the JVC can be unresponsive for 20+ seconds in some conditions.
+
 Here is an example of a raw command with numeric
 
 ```
@@ -257,6 +263,17 @@ Here is an example of a raw command with data
   - op: raw
     cmd: PMGT
     data: '5'
+```
+
+Here is the same example as above but with the (not recommended for cause use) timeout parameter.   The timeout
+is set to 5000 ms (or 5 seconds)
+
+```
+  # Gamma Custom 2
+  - op: raw
+    cmd: PMGT
+    data: '5'
+    timeout: 5000
 ```
 
 ## "rccode" operation
