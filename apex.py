@@ -136,7 +136,7 @@ def singleProfile2cmd(pname, profiles, targetIPs, log, cfg, stateHDR):
                     log.warning(f'Cannot parse operation {op}')
 
 
-            if op.get('target') == 'hdfury_vertex2':
+            elif op.get('target') == 'hdfury_vertex2':
 
                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                     cmd = op.get('cmd')
@@ -644,7 +644,7 @@ def apexMain():
 
     if cfg.get('hdfuryip', None) and cfg.get('hdfuryport', None):
         log.info(f'Connecting to HDFury')
-        hdfuryip = x0ip.X0IPGeneric('hdfury_vertex2_ack', (cfg['hdfuryip'], cfg['hdfuryport']), log, cfg['timeouts'])
+        hdfuryip = x0ip.X0IPGeneric('hdfury_vertex2_ack', (cfg['hdfuryip'], cfg['hdfuryport']), log, cfg['timeouts'], b'\n')
         hdfuryip.connect()
         targetIPs['hdfury_vertex2'] = hdfuryip
 

@@ -12,7 +12,7 @@ import socket
 
 class AbstractIP(ABC):
 
-    def __init__(self, name, peer, useLog, timeoutConfig):
+    def __init__(self, name, peer, useLog, timeoutConfig, delimit = None):
         self.name = name
         self.log = useLog
         self.peer = peer
@@ -21,6 +21,7 @@ class AbstractIP(ABC):
         self.timeout = timeoutConfig[self.name]
         self.buffer = b''
         self.chatty = False
+        self.delimit = delimit
 
     @abstractmethod
     def connect(self):
@@ -43,7 +44,7 @@ class AbstractIP(ABC):
 class X0IPJVC(AbstractIP):
     """IP connectivity to JVC"""
 
-    def __init__(self, name, peer, useLog, timeoutConfig):
+    def __init__(self, name, peer, useLog, timeoutConfig, delimit = None):
         self.name = name
         self.log = useLog
         self.peer = peer
@@ -207,7 +208,7 @@ class X0IPJVC(AbstractIP):
 class X0IPGeneric(AbstractIP):
     """IP connectivity to JVC"""
 
-    def __init__(self, name, peer, useLog, timeoutConfig):
+    def __init__(self, name, peer, useLog, timeoutConfig, delimit = b'\x1a\r\n'):
         self.name = name
         self.log = useLog
         self.peer = peer
@@ -215,6 +216,8 @@ class X0IPGeneric(AbstractIP):
         self.connected = False
         self.timeout = timeoutConfig[self.name]
         self.chatty = False
+        self.buffer = b''
+        self.delimit = delimit
 
     def connect(self):
         self.log.debug(f'Inside connect with peer {self.peer}')
@@ -269,6 +272,7 @@ class X0IPGeneric(AbstractIP):
 
             return False
 
+
     def read(self, emptyIt = False):
         try:
             if not self.connected:
@@ -284,17 +288,59 @@ class X0IPGeneric(AbstractIP):
             return b''
 
         try:
-            rxData = self.socket.recv(200)
+            # don't do a socket read if we have a message buffered
+            haveit = (self.buffer.find(self.delimit) >= 0)
+            if haveit:
+                self.log.debug(f'Using buffered data len={len(self.buffer)}, data={self.buffer}')
 
-            if (rxData == b''):
-                # no message in buffer
+            rxData = b''
+            if not haveit:
+                rxData = self.socket.recv(200)
+
+            if (not haveit) and (rxData == b''):
+                # no message in buffer and nothing received from network
                 if self.chatty:
                     self.log.debug('Socket read returned nothing')
                 return b''
             else:
-                if self.chatty:
-                    self.log.debug(f'returning {rxData}')
-                return rxData
+                if self.chatty and (not haveit):
+                    self.log.debug(f'Socket read returned {len(rxData)} bytes.   Buffer is {len(self.buffer)}')
+
+                self.buffer += rxData
+                
+                while True:
+                    if self.chatty:
+                        self.log.debug(f'buffer is {self.buffer}')
+
+                    first = self.buffer.find(self.delimit)
+                    if first >= 0:
+                        # we found it
+                        moreThanOne = self.buffer[first+len(self.delimit):].find(self.delimit) >= 0
+                        if self.chatty or moreThanOne:
+                            self.log.debug(f'buffer is {len(self.buffer)} data:{self.buffer}')
+
+                        r = self.buffer[0:first+len(self.delimit)]
+                        self.buffer = self.buffer[first+len(self.delimit):]
+
+                        if self.chatty or moreThanOne:
+                            self.log.debug(f'buffer reduced to len:{len(self.buffer)} data:{self.buffer}')
+
+                        if emptyIt:
+                            # ignore r and loop again
+                            if self.chatty:
+                                self.log.debug(f'Discarding {r}')
+                            pass
+
+                        else:
+                            # ok to return it
+                            if self.chatty:
+                                self.log.debug(f'returning {r}')
+                            return r
+    
+                    else:
+                        # didn't get a full line
+                        # nothing to return yet
+                        return b''
 
         except socket.timeout:
             if self.chatty:
@@ -306,4 +352,43 @@ class X0IPGeneric(AbstractIP):
             self.close()
 
             return b''
+
+
+    # def read(self, emptyIt = False):
+    #     try:
+    #         if not self.connected:
+    #             self.log.debug(f'read called but not connected')
+    #             self.connect()
+
+    #     except Exception as ex:
+    #         self.log.debug(f'Exception from connect during recv {ex}')
+    #         return b''
+
+    #     if not self.connected:
+    #         self.log.debug(f'Returning nothing because not connected')
+    #         return b''
+
+    #     try:
+    #         rxData = self.socket.recv(200)
+
+    #         if (rxData == b''):
+    #             # no message in buffer
+    #             if self.chatty:
+    #                 self.log.debug('Socket read returned nothing')
+    #             return b''
+    #         else:
+    #             if self.chatty:
+    #                 self.log.debug(f'returning {rxData}')
+    #             return rxData
+
+    #     except socket.timeout:
+    #         if self.chatty:
+    #             self.log.debug(f'Returning nothing because of timeout')
+    #         return b''
+
+    #     except Exception as ex:
+    #         self.log.debug(f'Exception from recv {ex}')
+    #         self.close()
+
+    #         return b''
 

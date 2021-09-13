@@ -355,6 +355,20 @@ profiles:
     requirePowerOn: False
 
 
+  profileOnkyoVolume0:
+  - op: raw
+    target: onkyo_818
+    cmd: MVL
+    data: '01'
+    requiresPowerOn: False
+
+  profileOnkyoVolumeAsk:
+  - op: raw
+    target: onkyo_818
+    cmd: MVL
+    data: 'QSTN'
+    requiresPowerOn: False
+
   profileAppleTV:
   - op: raw
     target: 'hdfury_vertex2'
@@ -370,11 +384,18 @@ profiles:
 
   - op: raw
     target: onkyo_818
-    cmd: MLV
-    data: '14'
+    cmd: SLI 
+    data: '22'
     requirePowerOn: False
 
-  - op: apex-power 
+
+  - op: raw
+    target: onkyo_818
+    cmd: MVL
+    data: '3C'
+    requirePowerOn: False
+
+  - op: apex-power
     data: 'on'
 
   - op: apex-hdfurymode
