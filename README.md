@@ -1,3 +1,6 @@
+!!! THIS IS A WORK IN PROGRESS !!!
+!!! DO NOT USE !!!
+
 # Apex
 
 Apex is a powerful tool to control your JVC projector.   Apex offers several features.
