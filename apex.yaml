@@ -1,6 +1,10 @@
 jvcip: '192.168.10.202'
 jvcport: 20554
 hdfury: '/dev/ttyUSB0'
+hdfuryip: 'vertex2-28.local'
+hdfuryport: 2220
+onkyoip: '192.168.10.165'
+onkyoport: 60128
 netcontrolport: 12345
 netcontrolsecret: 'secret'
 keydevice: '/dev/input/event0'
@@ -328,6 +332,79 @@ profiles:
 # Some Test Profiles
 # These are also (poor) examples
 #
+
+  profileOnkyoPowerOn:
+  - op: raw
+    target: onkyo_818
+    cmd: PWR
+    data: '01'
+    requirePowerOn: False
+
+  profileOnkyoPowerOff:
+  - op: raw
+    target: onkyo_818
+    cmd: PWR
+    data: '00'
+    requirePowerOn: False
+
+  profileOnkyoPowerAsk:
+  - op: raw
+    target: onkyo_818
+    cmd: PWR
+    data: 'QSTN'
+    requirePowerOn: False
+
+
+  profileAppleTV:
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'insel 1 4'
+    requirePowerOn: False
+
+  - op: raw
+    target: onkyo_818
+    cmd: PWR
+    data: '01'
+    requirePowerOn: False
+
+  - op: raw
+    target: onkyo_818
+    cmd: MLV
+    data: '14'
+    requirePowerOn: False
+
+  - op: apex-power 
+    data: 'on'
+
+  - op: apex-hdfurymode
+    target: 'jvc_pj'
+    data: 'follow'
+
+  - op: apex-hdmi
+    target: 'jvc_pj'
+    data: '1'
+
+
+  profileOSDTest:
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'osdtextstr Test_String_1'
+    requirePowerOn: False
+
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'osdtextstr Test_String_2'
+    requirePowerOn: False
+
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'osdtextstr Test_String_3'
+    requirePowerOn: False
+
 
   profileTestMenuButton:
   # RC code for Menu

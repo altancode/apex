@@ -2,28 +2,62 @@
 ## imports
 ##
 
+from abc import ABC, abstractmethod
 import socket
 
 ##
 ## code
 ##
 
-class X0IP:
-    """IP connectivity to JVC"""
 
-    def __init__(self, peer, useLog, timeoutConfig):
+class AbstractIP(ABC):
+
+    def __init__(self, name, peer, useLog, timeoutConfig):
+        self.name = name
         self.log = useLog
         self.peer = peer
-        self.socket = 0
+        self.socket = None
         self.connected = False
-        self.timeout = timeoutConfig['jvcIP']
+        self.timeout = timeoutConfig[self.name]
+        self.buffer = b''
+        self.chatty = False
+
+    @abstractmethod
+    def connect(self):
+        pass
+
+    @abstractmethod
+    def close(self):
+        pass
+
+    @abstractmethod
+    def send(self,data):
+        pass
+
+    @abstractmethod
+    def read(self, emptyIt = False):
+        pass
+
+
+
+class X0IPJVC(AbstractIP):
+    """IP connectivity to JVC"""
+
+    def __init__(self, name, peer, useLog, timeoutConfig):
+        self.name = name
+        self.log = useLog
+        self.peer = peer
+        self.socket = None
+        self.connected = False
+#        self.timeout = timeoutConfig['jvcIP']
+        self.timeout = timeoutConfig[self.name]
         self.buffer = b''
         self.ignoreACK = b'\x06\x89\x01\x00\x00\n'
         self.chatty = False
 
     def connect(self):
         self.log.debug(f'Inside connect with peer {self.peer}')
-        if self.socket != 0:
+        if self.socket != None:
             self.log.debug(f'Socket is not zero so closing it')
             self.close()
 
@@ -53,9 +87,9 @@ class X0IP:
 
     def close(self):
         self.log.debug(f'close socket was called')
-        if self.socket != 0:
+        if self.socket != None:
             self.socket.close()
-            self.socket = 0
+            self.socket = None
             self.connected = False
 
 
@@ -156,6 +190,111 @@ class X0IP:
                         # didn't get a full line
                         # nothing to return yet
                         return b''
+
+        except socket.timeout:
+            if self.chatty:
+                self.log.debug(f'Returning nothing because of timeout')
+            return b''
+
+        except Exception as ex:
+            self.log.debug(f'Exception from recv {ex}')
+            self.close()
+
+            return b''
+
+
+
+class X0IPGeneric(AbstractIP):
+    """IP connectivity to JVC"""
+
+    def __init__(self, name, peer, useLog, timeoutConfig):
+        self.name = name
+        self.log = useLog
+        self.peer = peer
+        self.socket = None
+        self.connected = False
+        self.timeout = timeoutConfig[self.name]
+        self.chatty = False
+
+    def connect(self):
+        self.log.debug(f'Inside connect with peer {self.peer}')
+        if self.socket != None:
+            self.log.debug(f'Socket is not zero so closing it')
+            self.close()
+
+        self.log.debug(f'Creating new socket')
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.socket.settimeout(self.timeout)
+        self.connected = False
+
+        try:
+            self.socket.connect(self.peer)
+            self.connected = True
+        except Exception as ex:
+            self.log.debug(f'connect exception {ex}')
+            self.close()
+
+        self.log.debug(f'Connected state is {self.connected}')
+        return self.connected
+
+    def close(self):
+        self.log.debug(f'close socket was called')
+        if self.socket != None:
+            self.socket.close()
+            self.socket = None
+            self.connected = False
+
+
+    def send(self,data):
+        try:
+            if not self.connected:
+                self.log.debug(f'send called but not connected')
+                self.connect()
+
+        except Exception as ex:
+            self.log.debug(f'Exception from connect during send {ex}')
+            return False
+
+        if not self.connected:
+            self.log.debug(f'Unexpected trying to send while not connected')
+            return False
+
+        try:
+            self.socket.sendall(data)
+            return True
+        except Exception as ex:
+            self.log.debug(f'socket send exception {ex}')
+            self.close()
+
+            return False
+
+    def read(self, emptyIt = False):
+        try:
+            if not self.connected:
+                self.log.debug(f'read called but not connected')
+                self.connect()
+
+        except Exception as ex:
+            self.log.debug(f'Exception from connect during recv {ex}')
+            return b''
+
+        if not self.connected:
+            self.log.debug(f'Returning nothing because not connected')
+            return b''
+
+        try:
+            rxData = self.socket.recv(200)
+
+            if (rxData == b''):
+                # no message in buffer
+                if self.chatty:
+                    self.log.debug('Socket read returned nothing')
+                return b''
+            else:
+                if self.chatty:
+                    self.log.debug(f'returning {rxData}')
+                return rxData
 
         except socket.timeout:
             if self.chatty:
