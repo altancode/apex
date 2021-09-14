@@ -24,7 +24,9 @@ import x0delay
 import x0hdfurymode
 import x0gammadstate
 import traceback
-from typing import List
+import importlib
+import pkgutil
+
 
 ## Constants
 
@@ -82,12 +84,12 @@ def convertPowerReq(op, defaultIfMissing=True):
 
     return r
 
-def singleProfile2cmd(pname, profiles, targetIPs, log, cfg, stateHDR):
+def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
     """takes a profile name and queues the associated commands"""
 
-    jvcip = targetIPs.get('jvc_pj', None)
-    hdfuryip = targetIPs.get('hdfury_vertex2', None)
-    onkyoip = targetIPs.get('onkyo_818', None)
+    jvcip = cmdTargets.get('jvc_pj')['conn']
+#    hdfuryip = targetIPs.get('hdfury_vertex2', None)
+#    onkyoip = targetIPs.get('onkyo_818', None)
 
     localQueue = []
 
@@ -102,7 +104,9 @@ def singleProfile2cmd(pname, profiles, targetIPs, log, cfg, stateHDR):
             if tar == None:
                 op['target'] = 'jvc_pj'
 
-            if op.get('target') == 'onkyo_818':
+            # check if the target is one we know
+            cmdTarget = cmdTargets.get(op['target'])
+            if cmdTarget:
 
                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                     cmd = op.get('cmd')
@@ -111,13 +115,8 @@ def singleProfile2cmd(pname, profiles, targetIPs, log, cfg, stateHDR):
 
                     updatedTimeouts = copy.deepcopy(cfg['timeouts'])
                     if timeout:
-                        updatedTimeouts['onkyo_818_ack'] = int(timeout)/1000
-                        log.debug(f"using timeout of {updatedTimeouts['onkyo_818_ack']} for {cmd} {data}")
-
-                    ###
-                    ### need to use onkyo object
-                    ### with onkyo ip
-                    ###
+                        updatedTimeouts[cmdTarget['config_timeout_ack']] = int(timeout)/1000
+                        log.debug(f"using timeout of {updatedTimeouts[cmdTarget['config_timeout_ack']]} for {cmd} {data}")
 
                     b = None
                     try:
@@ -126,48 +125,80 @@ def singleProfile2cmd(pname, profiles, targetIPs, log, cfg, stateHDR):
                         log.error(f'Cannot convert data to binary {data} {ex}')
 
                     if b != None:
-                        obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
+                        obj = cmdTarget['cmdobj'](cmdTarget['conn'], log, cfg['timeouts'])
+#                        obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
-
-#                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
-#                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
-
                 else:
                     log.warning(f'Cannot parse operation {op}')
 
 
-            elif op.get('target') == 'hdfury_vertex2':
 
-                if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
-                    cmd = op.get('cmd')
-                    data = op.get('data')
-                    timeout = op.get('timeout', None)
+#             if op.get('target') == 'onkyo_818':
 
-                    updatedTimeouts = copy.deepcopy(cfg['timeouts'])
-                    if timeout:
-                        updatedTimeouts['hdfury_vertex2_ack'] = int(timeout)/1000
-                        log.debug(f"using timeout of {updatedTimeouts['hdfury_vertex2_ack']} for {cmd} {data}")
+#                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
+#                     cmd = op.get('cmd')
+#                     data = op.get('data')
+#                     timeout = op.get('timeout', None)
 
-                    ###
-                    ### need to use hdfury object
-                    ### with hdfury ip
-                    ###
+#                     updatedTimeouts = copy.deepcopy(cfg['timeouts'])
+#                     if timeout:
+#                         updatedTimeouts['onkyo_818_ack'] = int(timeout)/1000
+#                         log.debug(f"using timeout of {updatedTimeouts['onkyo_818_ack']} for {cmd} {data}")
 
-                    b = None
-                    try:
-                        b = bytes(data,'utf-8')
-                    except Exception as ex:
-                        log.error(f'Cannot convert data to binary {data} {ex}')
+#                     ###
+#                     ### need to use onkyo object
+#                     ### with onkyo ip
+#                     ###
 
-                    if b != None:
-                        obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
-                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
+#                     b = None
+#                     try:
+#                         b = bytes(data,'utf-8')
+#                     except Exception as ex:
+#                         log.error(f'Cannot convert data to binary {data} {ex}')
 
-#                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
-#                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
+#                     if b != None:
+#                         obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
+#                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
 
-                else:
-                    log.warning(f'Cannot parse operation {op}')
+# #                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
+# #                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
+
+#                 else:
+#                     log.warning(f'Cannot parse operation {op}')
+
+
+#             elif op.get('target') == 'hdfury_vertex2':
+
+#                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
+#                     cmd = op.get('cmd')
+#                     data = op.get('data')
+#                     timeout = op.get('timeout', None)
+
+#                     updatedTimeouts = copy.deepcopy(cfg['timeouts'])
+#                     if timeout:
+#                         updatedTimeouts['hdfury_vertex2_ack'] = int(timeout)/1000
+#                         log.debug(f"using timeout of {updatedTimeouts['hdfury_vertex2_ack']} for {cmd} {data}")
+
+#                     ###
+#                     ### need to use hdfury object
+#                     ### with hdfury ip
+#                     ###
+
+#                     b = None
+#                     try:
+#                         b = bytes(data,'utf-8')
+#                     except Exception as ex:
+#                         log.error(f'Cannot convert data to binary {data} {ex}')
+
+#                     if b != None:
+#                         obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
+#                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
+
+# #                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
+# #                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
+
+#                 else:
+#                     log.warning(f'Cannot parse operation {op}')
 
 
             elif op.get('target') == 'jvc_pj':
@@ -324,12 +355,12 @@ def addPowerCheck(inlist, jvcip, log, cfg):
     return outlist
 
 
-def processLoop(cfg, targetIPs, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
+def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
-    jvcip = targetIPs.get('jvc_pj',None)
-    hdfuryip = targetIPs.get('hdfury_vertex2', None)
-    onkyoip = targetIPs.get('onkyo_818', None)
+    jvcip = cmdTargets.get('jvc_pj')['conn']
+#    hdfuryip = targetIPs.get('hdfury_vertex2', None)
+#    onkyoip = targetIPs.get('onkyo_818', None)
 
     watchGammaD = False
     nextGammaDTime = 0
@@ -350,14 +381,17 @@ def processLoop(cfg, targetIPs, vtxser, stateHDR, slowdown, netcontrol, keyinput
     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
     taskQueue.append(ApexTaskEntry(obj,('MD',b''), 'boot-model', False))
 
-    # and ask the HDFury something
-    obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
-    taskQueue.append(ApexTaskEntry(obj,('get',b'ipaddr'), 'boot-hdfury-ip', False))
+    # # and ask the HDFury something
+    # obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
+    # taskQueue.append(ApexTaskEntry(obj,('get',b'ipaddr'), 'boot-hdfury-ip', False))
 
-    # and ask Onkyo something
-    obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
-    taskQueue.append(ApexTaskEntry(obj,('PWR',b'QSTN'), 'boot-onkyo-power', False))
+    # # and ask Onkyo something
+    # obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
+    # taskQueue.append(ApexTaskEntry(obj,('PWR',b'QSTN'), 'boot-onkyo-power', False))
 
+    #
+    # The Big Loop
+    #
 
     while True:
         try:
@@ -423,7 +457,7 @@ def processLoop(cfg, targetIPs, vtxser, stateHDR, slowdown, netcontrol, keyinput
                                 # it is gamma d
                                 # look up the profile and add the commands
                                 log.info(f'Noticed Gamma D!  Adding profile "{gammaDProfile}"" to queue')
-                                taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, targetIPs, log, cfg, stateHDR)
+                                taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, cmdTargets, log, cfg, stateHDR)
 
             if finished:
                 # get the next one to process
@@ -489,7 +523,7 @@ def processLoop(cfg, targetIPs, vtxser, stateHDR, slowdown, netcontrol, keyinput
                                 log.debug(f'Switching stateHDR in mid flight to {pm}')
                                 stateHDR.set(pm,None)
                             else:
-                                taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, targetIPs, log, cfg, stateHDR), jvcip, log, cfg)
+                                taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, cmdTargets, log, cfg, stateHDR), jvcip, log, cfg)
                         else:
                             log.debug(f'Ignoring HDFury request to activate profile {profileName} ({pm})') 
                     else:
@@ -505,13 +539,13 @@ def processLoop(cfg, targetIPs, vtxser, stateHDR, slowdown, netcontrol, keyinput
                             verified.append(r)
                         else:
                             log.warning(f'Secret did not match in request for profile {r}')
-                    taskQueue = taskQueue + addPowerCheck(profile2cmd(verified, profiles, targetIPs, log, cfg, stateHDR), jvcip, log, cfg)
+                    taskQueue = taskQueue + addPowerCheck(profile2cmd(verified, profiles, cmdTargets, log, cfg, stateHDR), jvcip, log, cfg)
 
             if keyinput:
                 results = keyinput.action()
                 if len(results) > 0:
                     log.debug(f'keyinput results {results}')
-                    taskQueue = taskQueue + addPowerCheck(profile2cmd(results, profiles, targetIPs, log, cfg, stateHDR),  jvcip, log, cfg)
+                    taskQueue = taskQueue + addPowerCheck(profile2cmd(results, profiles, cmdTargets, log, cfg, stateHDR),  jvcip, log, cfg)
 
             if testOnetime:
                 testOnetime = False
@@ -635,26 +669,53 @@ def apexMain():
     log.info(f'Apex started...')
     log.debug(f'Using config {cfg}')
 
-    targetIPs = {}
+#    targetIPs = {}
+    cmdTargets = {}
 
     log.info(f'Connecting to JVC')
     jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvcip'], cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
-    targetIPs['jvc_pj'] = jvcip
+#    targetIPs['jvc_pj'] = jvcip
+    cmdTargets['jvc_pj'] = { 'conn': jvcip } 
 
-    if cfg.get('hdfuryip', None) and cfg.get('hdfuryport', None):
-        log.info(f'Connecting to HDFury')
-        hdfuryip = x0ip.X0IPGeneric('hdfury_vertex2_ack', (cfg['hdfuryip'], cfg['hdfuryport']), log, cfg['timeouts'], b'\n')
-        hdfuryip.connect()
-        targetIPs['hdfury_vertex2'] = hdfuryip
+##
+##
+##
 
-    if cfg.get('onkyoip', None) and cfg.get('onkyoport', None):
-        log.info(f'Connecting to Onkyo')
-        onkyoip = x0ip.X0IPGeneric('onkyo_818_ack', (cfg['onkyoip'], cfg['onkyoport']), log, cfg['timeouts'])
-        onkyoip.connect()
-        targetIPs['onkyo_818'] = onkyoip
+    discovered_plugins = {
+        name: importlib.import_module(name)
+        for finder, name, ispkg
+        in pkgutil.iter_modules()
+        if name.startswith('apextarget_')
+    }
 
-    log.debug(f'Device Targets: {targetIPs}')
+    print(f'*** discovered_plugings {discovered_plugins}')
+
+    for key in discovered_plugins:
+        details = discovered_plugins[key].getDetails()
+        log.info(f'Setting up plugin {details["name"]}')
+        conn = x0ip.X0IPGeneric(details['config_timeout_ack'], (cfg[details['config_ip']], cfg[details['config_port']]), log, cfg['timeouts'], details['delimiter'])
+        conn.connect()
+        cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
+
+    log.debug(f'cmdTargets: {cmdTargets}')
+
+##
+##
+##
+
+    # if cfg.get('hdfuryip', None) and cfg.get('hdfuryport', None):
+    #     log.info(f'Connecting to HDFury')
+    #     hdfuryip = x0ip.X0IPGeneric('hdfury_vertex2_ack', (cfg['hdfuryip'], cfg['hdfuryport']), log, cfg['timeouts'], b'\n')
+    #     hdfuryip.connect()
+    #     targetIPs['hdfury_vertex2'] = hdfuryip
+
+    # if cfg.get('onkyoip', None) and cfg.get('onkyoport', None):
+    #     log.info(f'Connecting to Onkyo')
+    #     onkyoip = x0ip.X0IPGeneric('onkyo_818_ack', (cfg['onkyoip'], cfg['onkyoport']), log, cfg['timeouts'])
+    #     onkyoip.connect()
+    #     targetIPs['onkyo_818'] = onkyoip
+
 
     vtxser = None
     if cfg.get('hdfury',None):
@@ -685,7 +746,7 @@ def apexMain():
             log.error(f'Exception while enabling keydevice.  Disabling... ("{ex}"')
      
     # this never returns
-    processLoop(cfg, targetIPs, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], cfg['netcontrolsecret'])
+    processLoop(cfg, cmdTargets, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], cfg['netcontrolsecret'])
 
 
 if __name__ == "__main__":

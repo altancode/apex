@@ -198,7 +198,7 @@ class X0IPJVC(AbstractIP):
             return b''
 
         except Exception as ex:
-            self.log.debug(f'Exception from recv {ex}')
+            self.log.debug(f'Exception from recv {ex}', exc_info=True)
             self.close()
 
             return b''
@@ -348,7 +348,7 @@ class X0IPGeneric(AbstractIP):
             return b''
 
         except Exception as ex:
-            self.log.debug(f'Exception from recv {ex}')
+            self.log.debug(f'Exception from recv {ex}', exc_info=True)
             self.close()
 
             return b''
