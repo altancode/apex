@@ -106,7 +106,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
 
             # check if the target is one we know
             cmdTarget = cmdTargets.get(op['target'])
-            if cmdTarget:
+            if cmdTarget and (op['target'] != 'jvc_pj'):
 
                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                     cmd = op.get('cmd')
@@ -131,75 +131,9 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                 else:
                     log.warning(f'Cannot parse operation {op}')
 
-
-
-#             if op.get('target') == 'onkyo_818':
-
-#                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
-#                     cmd = op.get('cmd')
-#                     data = op.get('data')
-#                     timeout = op.get('timeout', None)
-
-#                     updatedTimeouts = copy.deepcopy(cfg['timeouts'])
-#                     if timeout:
-#                         updatedTimeouts['onkyo_818_ack'] = int(timeout)/1000
-#                         log.debug(f"using timeout of {updatedTimeouts['onkyo_818_ack']} for {cmd} {data}")
-
-#                     ###
-#                     ### need to use onkyo object
-#                     ### with onkyo ip
-#                     ###
-
-#                     b = None
-#                     try:
-#                         b = bytes(data,'utf-8')
-#                     except Exception as ex:
-#                         log.error(f'Cannot convert data to binary {data} {ex}')
-
-#                     if b != None:
-#                         obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
-#                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
-
-# #                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
-# #                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
-
-#                 else:
-#                     log.warning(f'Cannot parse operation {op}')
-
-
-#             elif op.get('target') == 'hdfury_vertex2':
-
-#                 if op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
-#                     cmd = op.get('cmd')
-#                     data = op.get('data')
-#                     timeout = op.get('timeout', None)
-
-#                     updatedTimeouts = copy.deepcopy(cfg['timeouts'])
-#                     if timeout:
-#                         updatedTimeouts['hdfury_vertex2_ack'] = int(timeout)/1000
-#                         log.debug(f"using timeout of {updatedTimeouts['hdfury_vertex2_ack']} for {cmd} {data}")
-
-#                     ###
-#                     ### need to use hdfury object
-#                     ### with hdfury ip
-#                     ###
-
-#                     b = None
-#                     try:
-#                         b = bytes(data,'utf-8')
-#                     except Exception as ex:
-#                         log.error(f'Cannot convert data to binary {data} {ex}')
-
-#                     if b != None:
-#                         obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
-#                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
-
-# #                    obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
-# #                    localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
-
-#                 else:
-#                     log.warning(f'Cannot parse operation {op}')
-
+            ##
+            ## Now all the special case stuff for JVC which isn't a plugin
+            ##
 
             elif op.get('target') == 'jvc_pj':
 
