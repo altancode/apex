@@ -369,6 +369,27 @@ profiles:
     data: 'QSTN'
     requiresPowerOn: False
 
+  profileVertexInsel0:
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'insel 0 4'
+    requirePowerOn: False
+
+  profileVertexInsel1:
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: set
+    data: 'insel 1 4'
+    requirePowerOn: False
+
+  profileVertexGetInsel:
+  - op: raw
+    target: 'hdfury_vertex2'
+    cmd: get
+    data: 'insel'
+    requirePowerOn: False
+
   profileAppleTV:
   - op: raw
     target: 'hdfury_vertex2'
