@@ -95,11 +95,15 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
 
     pdata = profiles.get(pname)
     if pdata:
+
+        print(f'*** pdata {pdata}')
+
         # we found the profile
         for op in pdata:
 
             # first we look for the target parameter
             # if it does not exist, we assume it is JVCPJ
+            print(f'*** op {op}')
             tar = op.get('target', None)
             if tar == None:
                 op['target'] = 'jvc_pj'
