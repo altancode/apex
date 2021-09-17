@@ -8,15 +8,6 @@ onkyoport: 60128
 netcontrolport: 12345
 netcontrolsecret: 'secret'
 keydevice: '/dev/input/event0'
-#hdfury: '/dev/tty.usbserial-1420'
-#slowdown: 2
-
-#timeouts:
-#  hdfuryRead: 0.1
-#  jvcIP: 0.25
-#  jvcRefAck: 0.25
-#  jvcDefault: 2
-#  jvcOpAck: 20
 
 keymap:
   KEY_F1: 
