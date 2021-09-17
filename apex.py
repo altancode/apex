@@ -633,7 +633,9 @@ def apexMain():
             conn.connect()
         cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
 
-    log.debug(f'cmdTargets: {cmdTargets}')
+    log.info('Enabled Apex Targets:')
+    for key in cmdTargets:
+        log.info(f'  {key}')
 
     vtxser = None
     if cfg.get('hdfury',None):
