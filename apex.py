@@ -75,6 +75,8 @@ def power2Str(pow):
 
 def convertPowerReq(op, defaultIfMissing=True):
 
+    log.debug(f'covertPowerReq op is {op}')
+
 #    reqPowerOn = op.get('requirePowerOn',True)
     reqPowerOn = op.get('requirePowerOn',defaultIfMissing)
     
@@ -607,18 +609,12 @@ def apexMain():
     log.info(f'Apex started...')
     log.debug(f'Using config {cfg}')
 
-#    targetIPs = {}
     cmdTargets = {}
 
     log.info(f'Connecting to JVC')
     jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvcip'], cfg['jvcport']), log, cfg['timeouts'])
     jvcip.connect()
-#    targetIPs['jvc_pj'] = jvcip
     cmdTargets['jvc_pj'] = { 'conn': jvcip } 
-
-##
-##
-##
 
     discovered_plugins = {
         name: importlib.import_module(name)
@@ -631,9 +627,11 @@ def apexMain():
 
     for key in discovered_plugins:
         details = discovered_plugins[key].getDetails()
-        log.info(f'Setting up plugin {details["name"]}')
-        conn = x0ip.X0IPGeneric(details['config_timeout_ack'], (cfg[details['config_ip']], cfg[details['config_port']]), log, cfg['timeouts'], details['delimiter'])
-        conn.connect()
+        conn = None
+        if details['config_ip']:
+            log.info(f'Setting up plugin {details["name"]}')
+            conn = x0ip.X0IPGeneric(details['config_timeout_ack'], (cfg[details['config_ip']], cfg[details['config_port']]), log, cfg['timeouts'], details['delimiter'])
+            conn.connect()
         cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
 
     log.debug(f'cmdTargets: {cmdTargets}')

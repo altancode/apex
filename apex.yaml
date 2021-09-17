@@ -354,20 +354,40 @@ profiles:
     data: 'QSTN'
     requirePowerOn: False
 
+  profileShellSleep:
+  - op: raw
+    target: shell
+    cmd: 'sleep'
+    data: '2'
+    requirePowerOn: False
+
+  profileShellPython:
+  - op: raw
+    target: shell
+    cmd: '/usr/bin/python3.7m'
+    data: 'apexcmd.py -pf profileShellSleep'
+    requirePowerOn: False
+
+  profileShellError:
+  - op: raw
+    target: shell
+    cmd: '/usr/bin/python3.7mxxx'
+    data: 'apexcmd.py -pf profileShellSleep'
+    requirePowerOn: False
 
   profileOnkyoVolume0:
   - op: raw
     target: onkyo_818
     cmd: MVL
     data: '01'
-    requiresPowerOn: False
+    requirePowerOn: False
 
   profileOnkyoVolumeAsk:
   - op: raw
     target: onkyo_818
     cmd: MVL
     data: 'QSTN'
-    requiresPowerOn: False
+    requirePowerOn: False
 
   profileVertexInsel0:
   - op: raw
