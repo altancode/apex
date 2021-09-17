@@ -98,14 +98,11 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
     pdata = profiles.get(pname)
     if pdata:
 
-        print(f'*** pdata {pdata}')
-
         # we found the profile
         for op in pdata:
 
             # first we look for the target parameter
             # if it does not exist, we assume it is JVCPJ
-            print(f'*** op {op}')
             tar = op.get('target', None)
             if tar == None:
                 op['target'] = 'jvc_pj'
@@ -623,7 +620,9 @@ def apexMain():
         if name.startswith('apextarget_')
     }
 
-    print(f'*** discovered_plugings {discovered_plugins}')
+    log.info('Discovered Apex Target Plugins:')
+    for key in discovered_plugins:
+        log.info(f'  {key}')
 
     for key in discovered_plugins:
         details = discovered_plugins[key].getDetails()
@@ -635,23 +634,6 @@ def apexMain():
         cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
 
     log.debug(f'cmdTargets: {cmdTargets}')
-
-##
-##
-##
-
-    # if cfg.get('hdfuryip', None) and cfg.get('hdfuryport', None):
-    #     log.info(f'Connecting to HDFury')
-    #     hdfuryip = x0ip.X0IPGeneric('hdfury_vertex2_ack', (cfg['hdfuryip'], cfg['hdfuryport']), log, cfg['timeouts'], b'\n')
-    #     hdfuryip.connect()
-    #     targetIPs['hdfury_vertex2'] = hdfuryip
-
-    # if cfg.get('onkyoip', None) and cfg.get('onkyoport', None):
-    #     log.info(f'Connecting to Onkyo')
-    #     onkyoip = x0ip.X0IPGeneric('onkyo_818_ack', (cfg['onkyoip'], cfg['onkyoport']), log, cfg['timeouts'])
-    #     onkyoip.connect()
-    #     targetIPs['onkyo_818'] = onkyoip
-
 
     vtxser = None
     if cfg.get('hdfury',None):

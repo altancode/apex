@@ -4,8 +4,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath('..'))))
 
 import x0genericcmd
 
-print('I WAS CALLED')
-
 class X0HDFuryVertex2Cmd(x0genericcmd.X0GenericCmd):
     """
     Implements the communications for the HDFury Vertex
