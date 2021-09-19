@@ -25,7 +25,11 @@ netcontrol:
 keydevice:
   device: '/dev/input/event0'
 
-
+#
+# The keymap tells Apex which profile should be performed when a keypress occurrs
+# While these keypresses work from a physical keyboard, the expectation is that the
+# linux system will be configured to generate keypresses when IR codes are received
+#
 
 keymap:
   KEY_F1: 
