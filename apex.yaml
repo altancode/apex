@@ -1,13 +1,31 @@
-jvcip: '192.168.10.202'
-jvcport: 20554
-hdfury: '/dev/ttyUSB0'
-hdfuryip: 'vertex2-28.local'
-hdfuryport: 2220
-onkyoip: '192.168.10.165'
-onkyoport: 60128
-netcontrolport: 12345
-netcontrolsecret: 'secret'
-keydevice: '/dev/input/event0'
+
+#
+# New Config Format places device parameters inside a hierarchy
+#
+
+jvc_pj:
+  ip: '192.168.10.202'
+  port: 20554
+
+hdfury_serial:
+  device: '/dev/ttyUSB0'
+
+hdfury_generic:
+  ip: 'vertex2-28.local'
+  port: 2220
+
+onkyo_iscp:
+  ip: '192.168.10.165'
+  port: 60128
+
+netcontrol:
+  port: 12345
+  secret: 'secret'
+
+keydevice:
+  device: '/dev/input/event0'
+
+
 
 keymap:
   KEY_F1: 
@@ -330,107 +348,107 @@ profiles:
 
   profileOnkyoPowerOn:
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: PWR
     data: '01'
     requirePowerOn: False
 
   profileOnkyoPowerOff:
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: PWR
     data: '00'
     requirePowerOn: False
 
   profileOnkyoPowerAsk:
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: PWR
     data: 'QSTN'
     requirePowerOn: False
 
   profileShellSleep:
   - op: raw
-    target: shell
+    target: apex_shell
     cmd: 'sleep'
     data: '2'
     requirePowerOn: False
 
   profileShellPython:
   - op: raw
-    target: shell
+    target: apex_shell
     cmd: '/usr/bin/python3.7m'
     data: 'apexcmd.py -pf profileShellSleep'
     requirePowerOn: False
 
   profileShellError:
   - op: raw
-    target: shell
+    target: apex_shell
     cmd: '/usr/bin/python3.7mxxx'
     data: 'apexcmd.py -pf profileShellSleep'
     requirePowerOn: False
 
   profileOnkyoVolume0:
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: MVL
     data: '01'
     requirePowerOn: False
 
   profileOnkyoVolumeAsk:
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: MVL
     data: 'QSTN'
     requirePowerOn: False
 
   profileVertexInsel0:
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'insel 0 4'
     requirePowerOn: False
 
   profileVertexInsel1:
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'insel 1 4'
     requirePowerOn: False
 
   profileVertexGetInsel:
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: get
     data: 'insel'
     requirePowerOn: False
 
   profileAppleTVMovie:
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'edidtableinp0 1'
 
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'insel 1 4'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: PWR
     data: '01'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: SLI 
     data: '22'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: MVL
     data: '3C'
     requirePowerOn: False
@@ -449,30 +467,30 @@ profiles:
 
   profileAppleTVStreaming:
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'edidtableinp0 2'
 
   - op: raw
-    target: 'hdfury_vertex2'
+    target: 'hdfury_generic'
     cmd: set
     data: 'insel 1 4'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: PWR
     data: '01'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: SLI
     data: '22'
     requirePowerOn: False
 
   - op: raw
-    target: onkyo_818
+    target: onkyo_iscp
     cmd: MVL
     data: '3C'
     requirePowerOn: False

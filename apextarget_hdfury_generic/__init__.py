@@ -32,7 +32,7 @@ class X0HDFuryVertex2Cmd(x0genericcmd.X0GenericCmd):
 
         timeoutConfig: dictionary that can be used to retrieve the timeout
         """
-        return timeoutConfig['hdfury_vertex2_ack']
+        return timeoutConfig['hdfury_generic_ack']
 
     def makeCmdRetries(self, timeoutConfig):
         """Returns the number of times the command should be retried if a timeout occurs
@@ -80,11 +80,11 @@ class X0HDFuryVertex2Cmd(x0genericcmd.X0GenericCmd):
 
 def getDetails():
     details = {
-        'name': 'hdfury_vertex2',
+        'name': 'hdfury_generic',
         'cmdobj': X0HDFuryVertex2Cmd,
-        'config_ip': 'hdfuryip',
-        'config_port': 'hdfuryport',
-        'config_timeout_ack': 'hdfury_vertex2_ack',
+        'config_ip': 'ip',
+        'config_port': 'port',
+        'config_timeout_ack': 'hdfury_generic_ack',
         'delimiter': b'\n'
     }
 

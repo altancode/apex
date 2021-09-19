@@ -185,7 +185,7 @@ def getDetails():
     """ returns details about this Apex Target plugin, allowing Apex to use this functionality
     """
     details = {
-        'name': 'shell',
+        'name': 'apex_shell',
         'cmdobj': X0ShellCmd,
         'config_ip': None,
         'config_port': None,

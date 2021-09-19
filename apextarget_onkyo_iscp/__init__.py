@@ -46,7 +46,7 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
 
         timeoutConfig: dictionary that can be used to retrieve the timeout
         """
-        return timeoutConfig['hdfury_vertex2_ack']
+        return timeoutConfig['hdfury_generic_ack']
 
 
     def makeCmdRetries(self, timeoutConfig):
@@ -123,11 +123,11 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
 
 def getDetails():
     details = {
-        'name': 'onkyo_818',
+        'name': 'onkyo_iscp',
         'cmdobj': X0OnkyoReceiverCmd,
-        'config_ip': 'onkyoip',
-        'config_port': 'onkyoport',
-        'config_timeout_ack': 'onkyo_818_ack',
+        'config_ip': 'ip',
+        'config_port': 'port',
+        'config_timeout_ack': 'onkyo_iscp_ack',
         'delimiter': b'\x1a\r\n'
     }
 

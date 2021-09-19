@@ -26,7 +26,8 @@ import x0gammadstate
 import traceback
 import importlib
 import pkgutil
-
+from pprint import pformat
+from pprint import pprint
 
 ## Constants
 
@@ -90,8 +91,8 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
     """takes a profile name and queues the associated commands"""
 
     jvcip = cmdTargets.get('jvc_pj')['conn']
-#    hdfuryip = targetIPs.get('hdfury_vertex2', None)
-#    onkyoip = targetIPs.get('onkyo_818', None)
+#    hdfuryip = targetIPs.get('hdfury_generic', None)
+#    onkyoip = targetIPs.get('onkyo_iscp', None)
 
     localQueue = []
 
@@ -296,8 +297,8 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
     jvcip = cmdTargets.get('jvc_pj')['conn']
-#    hdfuryip = targetIPs.get('hdfury_vertex2', None)
-#    onkyoip = targetIPs.get('onkyo_818', None)
+#    hdfuryip = targetIPs.get('hdfury_generic', None)
+#    onkyoip = targetIPs.get('onkyo_iscp', None)
 
     watchGammaD = False
     nextGammaDTime = 0
@@ -519,6 +520,7 @@ def apexMain():
     parser = argparse.ArgumentParser()
     parser.add_argument("--showserialports", "-ssp", action='store_true', help="List available serial ports")
     parser.add_argument("--configfile", "-cf", help="Specify location of configuration file")
+    parser.add_argument("--configfile2", "-cf2", help="Specify location of a second configuration file (merged with first")
     parser.add_argument("--logfile", "-lf", help="Specify log file location")
 
     args = parser.parse_args()
@@ -540,19 +542,51 @@ def apexMain():
         x0serial.showSerialPorts()
         return
 
-    cfgName = 'apex.yaml'
+    cfg1 = {}
+    cfgName1 = 'apex.yaml'
     if args.configfile:
         # user has specified a locaiton for the config file
-        cfgName = args.configfile
-    log.info(f'Using config located {cfgName}')
+        cfgName1 = args.configfile
+    log.info(f'Using main config located at {cfgName1}')
 
     # read config
-    with open(cfgName) as file:
+    with open(cfgName1) as file:
         try:
-            cfg = yaml.full_load(file)
+            cfg1 = yaml.full_load(file)
         except Exception as ex:
             log.error(f'Unable to parse YAML configuration {ex}', exc_info=True)
             raise ex
+
+    cfg2 = {}
+    cfgName2 = None
+    if args.configfile2:
+        # user has specified a locaiton for the config file
+        cfgName2 = args.configfile2
+        log.info(f'Using user config2 located at {cfgName2}')
+
+        # read config
+        with open(cfgName2) as file:
+            try:
+                cfg2 = yaml.full_load(file)
+            except Exception as ex:
+                log.error(f'Unable to parse YAML configuration {ex}', exc_info=True)
+                raise ex
+
+    # merge cfg and cfg2
+    cfg = {}
+    allKeysDict = { **cfg1, **cfg2 }
+    keys = allKeysDict.keys()
+    print('*** KEYS ***')
+    pprint(keys)
+    for key in keys:
+        if isinstance(allKeysDict[key], dict):
+            # it is a dictionary
+            # merge the two dicts together.   cfg2 will win if conflict
+            cfg[key] = { **cfg1.get(key,{}), **cfg2.get(key,{}) } 
+        else:
+            # not a dictionary
+            # use value from cfg2 unless it does not exist, then use cfg1
+            cfg[key] = cfg2.get(key, cfg1.get(key,None))
 
 ##
 ## This whole thing should be updated to use a table with defaults
@@ -567,11 +601,11 @@ def apexMain():
     if not 'hdfuryRead' in cfg['timeouts']:
         cfg['timeouts']['hdfuryRead'] = 0.1
 
-    if not 'hdfury_vertex2_ack' in cfg['timeouts']:
-        cfg['timeouts']['hdfury_vertex2_ack'] = 2
+    if not 'hdfury_generic_ack' in cfg['timeouts']:
+        cfg['timeouts']['hdfury_generic_ack'] = 2
 
-    if not 'onkyo_818_ack' in cfg['timeouts']:
-        cfg['timeouts']['onkyo_818_ack'] = 2
+    if not 'onkyo_iscp_ack' in cfg['timeouts']:
+        cfg['timeouts']['onkyo_iscp_ack'] = 2
 
     if not 'jvcIP' in cfg['timeouts']:
         cfg['timeouts']['jvcIP'] = 0.25
@@ -597,21 +631,24 @@ def apexMain():
     if not 'slowdown' in cfg:
         cfg['slowdown'] = 0
 
-    if not 'netcontrolport' in cfg:
-        cfg['netcontrolport'] = 0
+    # if not 'netcontrolport' in cfg:
+    #     cfg['netcontrolport'] = 0
 
-    if not 'netcontrolsecret' in cfg:
-        cfg['netcontrolsecret'] = 'secret'
+    # if not 'netcontrolsecret' in cfg:
+    #     cfg['netcontrolsecret'] = 'secret'
 
     log.info(f'Apex started...')
-    log.debug(f'Using config {cfg}')
+    log.debug(f'Using config {pformat(cfg)}')
 
     cmdTargets = {}
 
-    log.info(f'Connecting to JVC')
-    jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvcip'], cfg['jvcport']), log, cfg['timeouts'])
-    jvcip.connect()
-    cmdTargets['jvc_pj'] = { 'conn': jvcip } 
+    if 'jvc_pj' in cfg:
+        log.info(f'Connecting to JVC')
+        jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvc_pj']['ip'], cfg['jvc_pj']['port']), log, cfg['timeouts'])
+        jvcip.connect()
+        cmdTargets['jvc_pj'] = { 'conn': jvcip } 
+    else:
+        log.warning('No jvc_pj configured')
 
     discovered_plugins = {
         name: importlib.import_module(name)
@@ -626,10 +663,19 @@ def apexMain():
 
     for key in discovered_plugins:
         details = discovered_plugins[key].getDetails()
+        pprint(details)
         conn = None
         if details['config_ip']:
             log.info(f'Setting up plugin {details["name"]}')
-            conn = x0ip.X0IPGeneric(details['config_timeout_ack'], (cfg[details['config_ip']], cfg[details['config_port']]), log, cfg['timeouts'], details['delimiter'])
+            c = cfg[details['name']]
+            pprint(c)
+            conn = x0ip.X0IPGeneric(
+                details['config_timeout_ack'], 
+                ( c [ details['config_ip'] ], c [ details['config_port'] ] ),
+                log, 
+                cfg['timeouts'], 
+                details['delimiter']
+            )
             conn.connect()
         cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
 
@@ -638,23 +684,25 @@ def apexMain():
         log.info(f'  {key}')
 
     vtxser = None
-    if cfg.get('hdfury',None):
-        vtxser = x0serial.X0Serial(cfg['hdfury'], log, cfg['timeouts'])
+    if cfg.get('hdfury_serial',None):
+        vtxser = x0serial.X0Serial(cfg['hdfury_serial']['device'], log, cfg['timeouts'])
         try:
             vtxser.connect()
-            log.info(f"HDFury device at {cfg['hdfury']}")
+            log.info(f"HDFury device at {cfg['hdfury_serial']['device']}")
         except Exception as ex:
             log.error(f'Exception while accessing serial port ("{ex}"')
             return
     else:
-        log.info('No HDFury device configured!')
+        log.info('No HDFury Serial device configured!')
 
     state = x0state.X0State(jvcip, log, cfg['timeouts'], cfg['closeOnComplete'])
 
+    netcontrolSecret = ''
     netcontrol = None
-    if cfg['netcontrolport'] != 0:
+    if 'netcontrol' in cfg:
         try:
-            netcontrol = x0netcontrol.x0NetControl(log, cfg['netcontrolport'])
+            netcontrol = x0netcontrol.x0NetControl(log, cfg['netcontrol']['port'])
+            netcontrolSecret = cfg['netcontrol'].get('secret','')
         except Exception as ex:
             log.error(f'Exception while enabling netcontrol.  Disabling... ("{ex}"')
 
@@ -666,7 +714,7 @@ def apexMain():
             log.error(f'Exception while enabling keydevice.  Disabling... ("{ex}"')
      
     # this never returns
-    processLoop(cfg, cmdTargets, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], cfg['netcontrolsecret'])
+    processLoop(cfg, cmdTargets, vtxser, state, cfg['slowdown'], netcontrol, keyinput, cfg['profiles'], netcontrolSecret)
 
 
 if __name__ == "__main__":
