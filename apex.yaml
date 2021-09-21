@@ -3,29 +3,51 @@
 # New Config Format places device parameters inside a hierarchy
 #
 
+# Apex expects a JVC projector to be connected by IP
+# Add the appropriate IP address for your setup
 jvc_pj:
   ip: '192.168.10.202'
   port: 20554
 
+# Apex receives HDR program mode information from the Vertex2 via a serial connection.
+# This parameter is generally expected, add the correct USB Serial device name
 hdfury_serial:
   device: '/dev/ttyUSB0'
 
-hdfury_generic:
-  ip: 'vertex2-28.local'
-  port: 2220
+# if you are controlling a hdfury (vertex2) device via IP, uncomment the following
+# and add the corret parameters
 
-onkyo_iscp:
-  ip: '192.168.10.165'
-  port: 60128
+# hdfury_generic:
+#   ip: 'vertex2-28.local'
+#   port: 2220
 
-netcontrol:
-  port: 12345
-  secret: 'secret'
+# if you are controlling an onkyo device that supports ISCP, uncomment the following
+# and add the correct parameters
 
-keys:
-  device: '/dev/input/event0'
+# onkyo_iscp:
+#   ip: '192.168.10.165'
+#   port: 60128
 
+# if you want to enable Apex's Net Control functionality, uncomment the following
+# and add an appropriate secret and port
 
+# netcontrol:
+#   port: 12345
+#   secret: 'secret'
+
+# if you want Apex to listen for key presses (which are expected to indirectly be IR codes)
+# then uncomment the following and add the appropriate parameter
+
+# keys:
+#   device: '/dev/input/event0'
+
+#
+# keymap
+#
+# the keymap tells Apex how to map key presses to profiles.
+# the expectation is that your Linux system is configured to map IR values to key presses.
+# however, you can trigger these using a real keyboard too
+#
 
 keymap:
   KEY_F1: 
@@ -36,10 +58,14 @@ keymap:
     profile: profileHDMI1
   KEY_2: 
     profile: profileHDMI2
-  KEY_3:
-    profile: profileAppleTVMovie
-  KEY_4:
-    profile: profileAppleTVStreaming
+
+#
+# profiles
+#
+# profiles are a sequence of 1 or more commands
+# this section defines the various profiles
+# some profiles are used internally by apex while others can be custom created by the user
+#
 
 profiles:
 #
@@ -110,9 +136,9 @@ profiles:
     
 #
 # Sample Profile with potentially useful commands
-# Do not activate this profile or else it is going to run a ton of commands
-# you certainly do not want
+# Do not activate this profile or else it is going to run a ton of commands you certainly do not want
 # Rather, use these commands in your own profiles!
+# the individual operations exist as examples of what you can use in your own profiles
 #
 
   sampleProfile_DoNotActivate:
@@ -286,11 +312,45 @@ profiles:
   - op: apex-pm
     data: '11'
 
+  # Move lens one notch upward
+  - op: raw
+    cmd: IN1U
+    data: ''
+
+  # Move lens one notch downward
+  - op: raw
+    cmd: IN1D
+    data: ''
+
+  # Move lens one notch left
+  - op: raw
+    cmd: IN1L
+    data: ''
+
+  # Move lens one notch right
+  - op: raw
+    cmd: IN1R
+    data: ''
+
+  # enable apex-hdfurymode as follow
+  - op: apex-hdfurymode
+    data: 'follow'
+
+  # set apex-hdfurymode to ignore
+  - op: apex-hdfurymode
+    data: 'ignore'
+
+  # enable the ongammad profile switch
+  - op: apex-ongammad
+    data: 'profileTestSelectGammaCustom1'
+
+  # disable the ongammad profile switch
+  - op: apex-ongammad
+    data: ''
 
 #
-# User Profiles are below
+# Standard simple (1 operation) profiles included by Apex
 # These can have any name and perform any steps you want
-# The content below are poor examples
 #
 
   # Apex Smart Power On
@@ -317,276 +377,4 @@ profiles:
   - op: apex-hdmi
     data: '2'
 
-  # Move lens one notch upward
-  profileLensNotchUp:
-  - op: raw
-    cmd: IN1U
-    data: ''
 
-  # Move lens one notch downward
-  profileLensNotchDown:
-  - op: raw
-    cmd: IN1D
-    data: ''
-
-  # Move lens one notch left
-  profileLensNotchLeft:
-  - op: raw
-    cmd: IN1L
-    data: ''
-
-  # Move lens one notch right
-  profileLensNotchRight:
-  - op: raw
-    cmd: IN1R
-    data: ''
-
-#
-# Some Test Profiles
-# These are also (poor) examples
-#
-
-  profileOnkyoPowerOn:
-  - op: raw
-    target: onkyo_iscp
-    cmd: PWR
-    data: '01'
-    requirePowerOn: False
-
-  profileOnkyoPowerOff:
-  - op: raw
-    target: onkyo_iscp
-    cmd: PWR
-    data: '00'
-    requirePowerOn: False
-
-  profileOnkyoPowerAsk:
-  - op: raw
-    target: onkyo_iscp
-    cmd: PWR
-    data: 'QSTN'
-    requirePowerOn: False
-
-  profileShellSleep:
-  - op: raw
-    target: apex_shell
-    cmd: 'sleep'
-    data: '2'
-    requirePowerOn: False
-
-  profileShellPython:
-  - op: raw
-    target: apex_shell
-    cmd: '/usr/bin/python3.7m'
-    data: 'apexcmd.py -pf profileShellSleep'
-    requirePowerOn: False
-
-  profileShellError:
-  - op: raw
-    target: apex_shell
-    cmd: '/usr/bin/python3.7mxxx'
-    data: 'apexcmd.py -pf profileShellSleep'
-    requirePowerOn: False
-
-  profileOnkyoVolume0:
-  - op: raw
-    target: onkyo_iscp
-    cmd: MVL
-    data: '01'
-    requirePowerOn: False
-
-  profileOnkyoVolumeAsk:
-  - op: raw
-    target: onkyo_iscp
-    cmd: MVL
-    data: 'QSTN'
-    requirePowerOn: False
-
-  profileVertexInsel0:
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'insel 0 4'
-    requirePowerOn: False
-
-  profileVertexInsel1:
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'insel 1 4'
-    requirePowerOn: False
-
-  profileVertexGetInsel:
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: get
-    data: 'insel'
-    requirePowerOn: False
-
-  profileAppleTVMovie:
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'edidtableinp0 1'
-    requirePowerOn: False
-
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'insel 1 4'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: PWR
-    data: '01'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: SLI 
-    data: '22'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: MVL
-    data: '3C'
-    requirePowerOn: False
-
-  - op: apex-power
-    data: 'on'
-
-  - op: apex-hdfurymode
-    target: 'jvc_pj'
-    data: 'follow'
-
-  - op: apex-hdmi
-    target: 'jvc_pj'
-    data: '1'
-
-
-  profileAppleTVStreaming:
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'edidtableinp0 2'
-    requirePowerOn: False
-
-  - op: raw
-    target: 'hdfury_generic'
-    cmd: set
-    data: 'insel 1 4'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: PWR
-    data: '01'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: SLI
-    data: '22'
-    requirePowerOn: False
-
-  - op: raw
-    target: onkyo_iscp
-    cmd: MVL
-    data: '3C'
-    requirePowerOn: False
-
-  - op: apex-power
-    data: 'on'
-
-  - op: apex-hdfurymode
-    target: 'jvc_pj'
-    data: 'follow'
-
-  - op: apex-hdmi
-    target: 'jvc_pj'
-    data: '1'
-
-
-  profileTestMenuButton:
-  # RC code for Menu
-  - op: rccode
-    data: '732E'
-
-  profileTest1:
-  - op: raw
-    cmd: IP
-    data: '7'
-  - op: rccode
-    data: '732E'
-  - op: rccode
-    data: '7301'
-  - op: rccode
-    data: '7302'
-    
-  profileTest2:
-  - op: raw
-    cmd: PMLA
-    numeric: -2
-
-  profileTest3:
-  - op: raw
-    cmd: PMCN
-    numeric: -11
-
-  profileTest4:
-  - op: raw
-    cmd: PMCN
-    numeric: 0
-
-  profileTestSmallDelay:
-  - op: apex-delay
-    data: '5000'
-    requirePowerOn: False
-
-  profileTestDelay:
-  - op: apex-delay
-    data: '10000'
-    requirePowerOn: False
-
-  - op: apex-delay
-    data: '5000'
-    requirePowerOn: False
-
-  - op: apex-delay
-    data: '20000'
-    requirePowerOn: False
-
-  profileTestFollow:
-  - op: apex-hdfurymode
-    data: 'follow'
-
-  profileTestIgnore:
-  - op: apex-hdfurymode
-    data: 'ignore'
-
-  profileTestOnGammaDEnable:
-  - op: apex-ongammad
-    data: 'profileTestSelectGammaCustom1'
-
-  profileTestOnGammaDDisable:
-  - op: apex-ongammad
-    data: ''
-
-  profileTestSelectGammaD:
-  - op: raw
-    cmd: PMGT
-    data: '7'
-
-  profileTestSelectGammaCustom1:
-  - op: raw
-    cmd: PMGT
-    data: '4'
-
-  profileTestRawTimeout:
-  - op: raw
-    cmd: FAKE
-    data: '6'
-    timeout: 1000
-    requirePowerOn: False
