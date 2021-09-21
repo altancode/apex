@@ -576,8 +576,8 @@ def apexMain():
     cfg = {}
     allKeysDict = { **cfg1, **cfg2 }
     keys = allKeysDict.keys()
-    print('*** KEYS ***')
-    pprint(keys)
+    # print('*** KEYS ***')
+    # pprint(keys)
     for key in keys:
         if isinstance(allKeysDict[key], dict):
             # it is a dictionary
@@ -663,21 +663,31 @@ def apexMain():
 
     for key in discovered_plugins:
         details = discovered_plugins[key].getDetails()
-        pprint(details)
-        conn = None
-        if details['config_ip']:
-            log.info(f'Setting up plugin {details["name"]}')
-            c = cfg[details['name']]
-            pprint(c)
-            conn = x0ip.X0IPGeneric(
-                details['config_timeout_ack'], 
-                ( c [ details['config_ip'] ], c [ details['config_port'] ] ),
-                log, 
-                cfg['timeouts'], 
-                details['delimiter']
-            )
-            conn.connect()
-        cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
+#        pprint(details)
+
+        # do we have a configuration for this target?
+        c = cfg.get(details['name'],None)
+        if not c:
+            log.info(f'No configuration for {details["name"]}')
+        else:
+
+            conn = None
+            # does this target use ip?
+            if details['config_ip']:
+                log.info(f'Setting up plugin {details["name"]}')
+
+#                pprint(c)
+                conn = x0ip.X0IPGeneric(
+                    details['config_timeout_ack'], 
+                    ( c [ details['config_ip'] ], c [ details['config_port'] ] ),
+                    log, 
+                    cfg['timeouts'], 
+                    details['delimiter']
+                )
+                conn.connect()
+
+            # and add the target whether it uses IP or not
+            cmdTargets[details['name']] = { 'conn': conn, 'cmdobj': details['cmdobj']}
 
     log.info('Enabled Apex Targets:')
     for key in cmdTargets:
