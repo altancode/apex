@@ -707,9 +707,9 @@ def apexMain():
             log.error(f'Exception while enabling netcontrol.  Disabling... ("{ex}"')
 
     keyinput = None
-    if 'keydevice' in cfg:
+    if 'keys' in cfg and 'device' in cfg['keys']:
         try:
-            keyinput = x0keys.x0Keys(log, cfg['keydevice'], cfg['keymap'])
+            keyinput = x0keys.x0Keys(log, cfg['keys']['device'], cfg['keymap'])
         except Exception as ex:
             log.error(f'Exception while enabling keydevice.  Disabling... ("{ex}"')
      
