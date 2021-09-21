@@ -14,6 +14,10 @@ jvc_pj:
 hdfury_serial:
   device: '/dev/ttyUSB0'
 
+# if you don't want the apex-shell functionality then comment out the following
+apex_shell:
+  _ignore: True
+
 # if you are controlling a hdfury (vertex2) device via IP, uncomment the following
 # and add the corret parameters
 
