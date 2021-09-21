@@ -22,14 +22,10 @@ netcontrol:
   port: 12345
   secret: 'secret'
 
-keydevice:
+keys:
   device: '/dev/input/event0'
 
-#
-# The keymap tells Apex which profile should be performed when a keypress occurrs
-# While these keypresses work from a physical keyboard, the expectation is that the
-# linux system will be configured to generate keypresses when IR codes are received
-#
+
 
 keymap:
   KEY_F1: 
@@ -432,6 +428,7 @@ profiles:
     target: 'hdfury_generic'
     cmd: set
     data: 'edidtableinp0 1'
+    requirePowerOn: False
 
   - op: raw
     target: 'hdfury_generic'
@@ -474,6 +471,7 @@ profiles:
     target: 'hdfury_generic'
     cmd: set
     data: 'edidtableinp0 2'
+    requirePowerOn: False
 
   - op: raw
     target: 'hdfury_generic'
