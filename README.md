@@ -1,5 +1,95 @@
--!!! THIS IS A WORK IN PROGRESS !!!
--!!! DO NOT USE !!!
+# Work In Progress Notes
+
+Some big changes and one that impacts compatibikity.
+
+## Operation Targets
+
+This release of Apex allows control of devices beyond the JVC projector!  While Apex has always received data via serial
+from an HDFury Vertex 2 and controlled a JVC projector by IP, this version allows control of additional devices.   Specifially:
+
+1. Apex can now send commands to the HD Fury Vertex 2 (and probably other HD Fury devices) via IP
+1. Apex can now send commands to Onkyo receivers supporting ISCP (their control protocol)
+
+In addition to controlling new devices by IP, Apex also now supports executing arbitrary shell commands.
+
+The above functionality is implemented in a "plugin" like manner which should allow "easy" support for new devices in the future.
+
+This new functionaithy is implemented in a manner consistent with existing Apex operations.   Each operation now supports a new
+"target" parameter.   Currently the supported targets are
+
+1. jvc_pj
+1. hdfury_generic
+1. onkyo_iscp
+1. apex_shell
+
+As an example of using "target", the following operation changes an Onkyo receiver's volume
+
+  - op: raw
+    target: onkyo_iscp
+    cmd: MVL
+    data: '3C'
+
+For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
+
+## New Configuration File Format
+
+In order to support the target functionality and easily support new targets moving forward, all target
+configuration is now placed into a target object.   _This breaks compatibility with the previous configuration 
+format._
+
+Note: honestly, I could have supported the old format.   However, because there doesn't seem to be a lot of
+people using Apex, it seemed best to avoid legacy code and complexity and require everyone to adjust to the new 
+format.
+
+The old configuration format looked like
+
+  jvcip: '192.168.10.202'
+  jvcport: 20554
+  hdfury: '/dev/ttyUSB0'
+  netcontrolport: 12345
+  netcontrolsecret: 'secret'
+  keydevice: '/dev/input/event0'
+
+This now looks like
+
+  jvc_pj:
+    ip: '192.168.10.202'
+    port: 20554
+
+  hdfury_serial:
+    device: '/dev/ttyUSB0'
+
+  netcontrol:
+    port: 12345
+    secret: 'secret'
+
+  keys:
+    device: '/dev/input/event0'
+
+Using this new configuration format, the new targets are configured using
+
+  hdfury_generic:
+    ip: 'vertex2-28.local'
+    port: 2220
+
+  onkyo_iscp:
+    ip: '192.168.10.165'
+    port: 60128
+
+  apex_shell:
+    _ignore: True
+
+## Second Configuration File Support
+
+With this release, Apex supports 2 configuration files, Config1 and Config2.   Any parameters
+placed into Config2 will replace anything that already exists in Config1.  This two configuration
+file approach should allow uses to keep their customizations in a file separate from the official
+Apex release while still using settings or parameters that exist in the default configuration.
+
+In order to use the second configuration file, the new command line parameter "-configfile2" (or "-cf2")
+has been added.
+
+
 
 # Apex
 
