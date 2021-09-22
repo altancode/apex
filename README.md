@@ -43,15 +43,18 @@ format.
 
 The old configuration format looked like
 
+```
   jvcip: '192.168.10.202'
   jvcport: 20554
   hdfury: '/dev/ttyUSB0'
   netcontrolport: 12345
   netcontrolsecret: 'secret'
   keydevice: '/dev/input/event0'
+```
 
 This now looks like
 
+```
   jvc_pj:
     ip: '192.168.10.202'
     port: 20554
@@ -65,9 +68,11 @@ This now looks like
 
   keys:
     device: '/dev/input/event0'
+```
 
 Using this new configuration format, the new targets are configured using
 
+```
   hdfury_generic:
     ip: 'vertex2-28.local'
     port: 2220
@@ -78,6 +83,7 @@ Using this new configuration format, the new targets are configured using
 
   apex_shell:
     _ignore: True
+```
 
 ## Second Configuration File Support
 
