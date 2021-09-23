@@ -24,10 +24,12 @@ This new functionaithy is implemented in a manner consistent with existing Apex 
 
 As an example of using "target", the following operation changes an Onkyo receiver's volume
 
+```
   - op: raw
     target: onkyo_iscp
     cmd: MVL
     data: '3C'
+```
 
 For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
 
