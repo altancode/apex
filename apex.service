@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
-ExecStart=/usr/bin/python3 /home/pi/apex/apex.py --configfile /home/pi/apex/apex.yaml --logfile /home/pi/apex/apex.log
+ExecStart=/usr/bin/python3 /home/pi/apex/apex.py --configfile /home/pi/apex/apex.yaml --configfile2 /home/pi/apex/apex2.yaml --logfile /home/pi/apex/apex.log
 
 [Install]
 WantedBy=multi-user.target
