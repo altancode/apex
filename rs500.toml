@@ -5,5 +5,12 @@ protocol = "jvc"
 0x632e = "KEY_MENU"
 0x6370 = "KEY_1"
 0x6371 = "KEY_2"
+
+#FILM-B
+0x6369 = "KEY_3"
+
+#CINEMA-B
+0x6368 = "KEY_4"
+
 0x6305 = "KEY_F1"
 0x6306 = "KEY_F2"
