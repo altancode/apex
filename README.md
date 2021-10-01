@@ -1,114 +1,18 @@
-# Work In Progress Notes
-
-Some big changes and one that impacts compatibikity.
-
-## Operation Targets
-
-This release of Apex allows control of devices beyond the JVC projector!  While Apex has always received data via serial
-from an HDFury Vertex 2 and controlled a JVC projector by IP, this version allows control of additional devices.   Specifially:
-
-1. Apex can now send commands to the HD Fury Vertex 2 (and probably other HD Fury devices) via IP
-1. Apex can now send commands to Onkyo receivers supporting ISCP (their control protocol)
-
-In addition to controlling new devices by IP, Apex also now supports executing arbitrary shell commands.
-
-The above functionality is implemented in a "plugin" like manner which should allow "easy" support for new devices in the future.
-
-This new functionaithy is implemented in a manner consistent with existing Apex operations.   Each operation now supports a new
-"target" parameter.   Currently the supported targets are
-
-1. jvc_pj
-1. hdfury_generic
-1. onkyo_iscp
-1. apex_shell
-
-As an example of using "target", the following operation changes an Onkyo receiver's volume
-
-```
-  - op: raw
-    target: onkyo_iscp
-    cmd: MVL
-    data: '3C'
-```
-
-For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
-
-## New Configuration File Format
-
-In order to support the target functionality and easily support new targets moving forward, all target
-configuration is now placed into a target object.   _This breaks compatibility with the previous configuration 
-format._
-
-Note: honestly, I could have supported the old format.   However, because there doesn't seem to be a lot of
-people using Apex, it seemed best to avoid legacy code and complexity and require everyone to adjust to the new 
-format.
-
-The old configuration format looked like
-
-```
-  jvcip: '192.168.10.202'
-  jvcport: 20554
-  hdfury: '/dev/ttyUSB0'
-  netcontrolport: 12345
-  netcontrolsecret: 'secret'
-  keydevice: '/dev/input/event0'
-```
-
-This now looks like
-
-```
-  jvc_pj:
-    ip: '192.168.10.202'
-    port: 20554
-
-  hdfury_serial:
-    device: '/dev/ttyUSB0'
-
-  netcontrol:
-    port: 12345
-    secret: 'secret'
-
-  keys:
-    device: '/dev/input/event0'
-```
-
-Using this new configuration format, the new targets are configured using
-
-```
-  hdfury_generic:
-    ip: 'vertex2-28.local'
-    port: 2220
-
-  onkyo_iscp:
-    ip: '192.168.10.165'
-    port: 60128
-
-  apex_shell:
-    _ignore: True
-```
-
-## Second Configuration File Support
-
-With this release, Apex supports 2 configuration files, Config1 and Config2.   Any parameters
-placed into Config2 will replace anything that already exists in Config1.  This two configuration
-file approach should allow uses to keep their customizations in a file separate from the official
-Apex release while still using settings or parameters that exist in the default configuration.
-
-In order to use the second configuration file, the new command line parameter "-configfile2" (or "-cf2")
-has been added.
-
-
-
 # Apex
 
-Apex is a powerful tool to control your JVC projector.   Apex offers several features.
+Apex is a powerful tool to control your JVC projector and other devices.   Apex offers several features.
 
 1. Apex optimizes the JVC + HD Fury HDR experience.
 2. Apex allows deep control of the JVC using both network connectivity and IR
+3. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP and HDFury's IP protocol
 
 # What's New?
 
-The latest release supports picture modes from more recent JVC projectors as well as adding an optional timeout for RAW operations.
+The latest release has 3 significant changes.
+
+1. In addition to controlling the JVC, Apex now supports Operational Targets for commands.  Currently Onkyo's ISCP and HDFury's Generic IP are supported.
+1. There is a new configuration format.   This is not backward but allows more consistent configurations for Targets.
+1. Configurations can be broken into 2 separate files where settings in the 2nd file overwrite those in the first
 
 # Apex HDR Experience Optimization
 
@@ -153,6 +57,37 @@ is to use the Apex Optimized Picture Mode algorithm for User 2.  However, you ca
 Apex allows external devices to activate profiles using network communication.   Additionally, Apex allows profiles to be activated based on
 IR commands.
 
+## Operation Targets
+
+This release of Apex allows control of devices beyond the JVC projector!  While Apex has always received data via serial
+from an HDFury Vertex 2 and controlled a JVC projector by IP, this version allows control of additional devices.   Specifially:
+
+1. Apex can now send commands to the HD Fury Vertex 2 (and probably other HD Fury devices) via IP
+1. Apex can now send commands to Onkyo receivers supporting ISCP (their control protocol)
+
+In addition to controlling new devices by IP, Apex also now supports executing arbitrary shell commands.
+
+The above functionality is implemented in a "plugin" like manner which should allow "easy" support for new devices in the future.
+
+This new functionality is implemented in a manner consistent with existing Apex operations.   Each operation now supports a new
+"target" parameter.   Currently the supported targets are
+
+1. jvc_pj
+1. hdfury_generic
+1. onkyo_iscp
+1. apex_shell
+
+As an example of using "target", the following operation changes an Onkyo receiver's volume
+
+```
+  - op: raw
+    target: onkyo_iscp
+    cmd: MVL
+    data: '3C'
+```
+
+For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
+
 # Is Apex Right for Me?
 
 Apex may be right of you if...
@@ -193,7 +128,7 @@ you need to comment out the "hdfury" line in the apex.yaml file.
 1. Create a directory somewhere called apex
 1. Retrieve Apex from the Repo
 1. Install the requirements using "pip3 install -r requirements.txt"
-1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, change "jvcip" to be the IP of the JVC projector and change "hdfury" to be the serial device name of the HDFury device.
+1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, inside the "jvc_pj" object, change "ip" parameter to be the IP of the JVC projector and within the "hdfury_serial" change "devie" to be the serial device name of the HDFury device.
 1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex is listen on for external commands.  Also change 
 "netcontrolsecret" to a secret value for your specific setup.
 1. Eventually you'll want to have Apex start automatically, but to get started you can simply use "python3 apex.py"
@@ -466,6 +401,66 @@ In the above example, when Apex receives an IR keypress represented as "KEY_F1",
 Apex receives the IR keypress represented as "KEY_1", Apex will activate the profile named "profileHDMI1".
 
 You can map any supported Linux key code to any defined profile.
+
+## New Configuration File Format
+
+In order to support the target functionality and easily support new targets moving forward, all target
+configuration is now placed into a target object.   _This breaks compatibility with the previous configuration 
+format._
+
+The old configuration format looked like
+
+```
+  jvcip: '192.168.10.202'
+  jvcport: 20554
+  hdfury: '/dev/ttyUSB0'
+  netcontrolport: 12345
+  netcontrolsecret: 'secret'
+  keydevice: '/dev/input/event0'
+```
+
+This now looks like
+
+```
+  jvc_pj:
+    ip: '192.168.10.202'
+    port: 20554
+
+  hdfury_serial:
+    device: '/dev/ttyUSB0'
+
+  netcontrol:
+    port: 12345
+    secret: 'secret'
+
+  keys:
+    device: '/dev/input/event0'
+```
+
+Using this new configuration format, the new targets are configured using
+
+```
+  hdfury_generic:
+    ip: 'vertex2-28.local'
+    port: 2220
+
+  onkyo_iscp:
+    ip: '192.168.10.165'
+    port: 60128
+
+  apex_shell:
+    _ignore: True
+```
+
+## Second Configuration File Support
+
+With this release, Apex supports 2 configuration files, Config1 and Config2.   Any parameters
+placed into Config2 will replace anything that already exists in Config1.  This two configuration
+file approach should allow uses to keep their customizations in a file separate from the official
+Apex release while still using settings or parameters that exist in the default configuration.
+
+In order to use the second configuration file, the new command line parameter "-configfile2" (or "-cf2")
+has been added.
 
 # Tips
 
