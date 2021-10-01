@@ -513,8 +513,8 @@ def apexMain():
     # for stderr
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-#    handler.setLevel(logging.INFO)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(logging.INFO)
+#    handler.setLevel(logging.DEBUG)
     log.addHandler(handler)
 
     parser = argparse.ArgumentParser()
