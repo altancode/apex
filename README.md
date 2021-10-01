@@ -4,7 +4,7 @@ Apex is a powerful tool to control your JVC projector and other devices.   Apex 
 
 1. Apex optimizes the JVC + HD Fury HDR experience.
 2. Apex allows deep control of the JVC using both network connectivity and IR
-3. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP and HDFury's IP protocol
+3. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP, HDFury's IP protocol and the very powerful ability to execute shell commands
 
 # What's New?
 
@@ -351,7 +351,7 @@ cases you can make those work by simply adding 73 to the front (resulting in 732
 Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
 If you want to send "Code B" commands, replace the 73 with 63.
 
-## Onkyo ISCP
+## Onkyo ISCP Command Target
 
 The Onkyo ISCP Command Target supports raw commands.  Below is an example that powers on an Onkyo ISCP device.
 
@@ -364,7 +364,7 @@ The Onkyo ISCP Command Target supports raw commands.  Below is an example that p
     requirePowerOn: False
 ```
 
-## HDFury Generic IP
+## HDFury Generic IP Command Target
 
 The HDFury Generic Command Target supports raw commands.  Below is an example that selects enables splitter mode with input 1 selected.
 
@@ -373,6 +373,19 @@ The HDFury Generic Command Target supports raw commands.  Below is an example th
     target: 'hdfury_generic'
     cmd: set
     data: 'insel 0 4'
+    requirePowerOn: False
+```
+
+## Apex Shell Command Target
+
+The Apex Shell Command Target supports raw commands.   The cmd field specifies the program to run and the data field specifies any parameters.
+Below is an example using python3.7 to run a made up program.
+
+```
+  - op: raw
+    target: apex_shell
+    cmd: '/usr/bin/python3.7m'
+    data: 'myOwnStuff.py -myOwnCommand myOwnParameter'
     requirePowerOn: False
 ```
 
