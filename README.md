@@ -98,6 +98,7 @@ Apex may be right of you if...
 * Your JVC does not reliably turn on or off and you'd like rock solid behavior?
 * You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
 * Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
+* You want to control Onkyo ISCP devices, HDFury Generic IP devices, or just execute arbitrary shell scripts
 
 # Example of Apex's HDR Optimization Value
 
