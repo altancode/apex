@@ -144,6 +144,28 @@ If you don't know how the serial ports are named on the device running Apex, you
 1. Make sure the Macro "Send on every sync" is checked. 
 1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device is save the new settings.
 
+# Onkyo ISCP Command Target Setup
+
+If you want to use Apex to control an Onkyo ISCP device, you must provide Apex with the IP address of your Onkyo device.  Under the onkyo_iscp object,
+update the ip field to contain the device's IP address.
+
+```
+onkyo_iscp:
+  ip: '192.168.10.165'
+  port: 60128
+```
+
+# HDFury Generic IP Setup
+
+If you want to use Apex to control an HDFury Generic IP device, you must provide Apex with the IP address of your HDFury device.   Under the hdfury_generic object,
+update the ip field to contain the device's IP address
+
+```
+hdfury_generic:
+  ip: 'vertex2-28.local'
+  port: 2220
+```
+
 # Profile Details
 
 Profiles are stored in the apex.yaml file.  All profiles, whether custom or core, exist under the "profiles" entry.  Below is an example.
@@ -328,6 +350,31 @@ That that many older documents pertaining to remote control code often include o
 cases you can make those work by simply adding 73 to the front (resulting in 732E).  The full 4 character code is supported by 
 Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
 If you want to send "Code B" commands, replace the 73 with 63.
+
+## Onkyo ISCP
+
+The Onkyo ISCP Command Target supports raw commands.  Below is an example that powers on an Onkyo ISCP device.
+
+```
+  profileOnkyoPowerOn:
+  - op: raw
+    target: onkyo_iscp
+    cmd: PWR
+    data: '01'
+    requirePowerOn: False
+```
+
+## HDFury Generic IP
+
+The HDFury Generic Command Target supports raw commands.  Below is an example that selects enables splitter mode with input 1 selected.
+
+```
+  - op: raw
+    target: 'hdfury_generic'
+    cmd: set
+    data: 'insel 0 4'
+    requirePowerOn: False
+```
 
 ## Bringing it Together
 As stated, profiles can have multiple operations.  Below is an example profile called "profileExample" that combines some of the
