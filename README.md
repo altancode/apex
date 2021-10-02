@@ -14,6 +14,11 @@ The latest release has 3 significant changes.
 1. There is a new configuration format.   This is not backward but allows more consistent configurations for Targets.
 1. Configurations can be broken into 2 separate files where settings in the 2nd file overwrite those in the first
 
+# Using Apex Example
+
+A little information about how I use Apex is documented [here](how.md).   It covers the profiles I use to control my JVC, Vertex2 and Onkyo receiver as well
+as explaining my use of 2 EDID tables.
+
 # Apex HDR Experience Optimization
 
 The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
