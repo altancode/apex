@@ -10,19 +10,21 @@ My equipment is a little dated but works very well.   The JVC RS500 projector, f
 4. Apple TV 4K (2nd generation)
 
 ## In The Beginning
-When I first created Apex, I was using an NVIDIA Sheild.  However, I've recently
+When I first created Apex, I was using an NVIDIA Shield.  However, I've recently
 replaced it with a 2nd generation Apple TV 4K.
 
 With the Shield, Apex would optimization switching between HDR 1200 and HDR 4000 modes.
 As mentioned in the README, one aspect of Apex is that it performs this reliably and does not need "worst case timeouts".
+
+Even using the AppleTV running in Dolby Vision, Apex optimizes switching between 4K SDR and 4K HDR.  More on this below.
 
 ## How it's connected
 
 The audio/video components are connected as follows
 
 ```
-   AppleTV 4K -(HDMI)-> Vertex 2 -(HDMI)-> Onkyo TX-NR818
-                                 -(HDMI)-> JVC RS500
+   AppleTV 4K   -(HDMI)-> Vertex 2 -(HDMI)-> Onkyo TX-NR818
+                                   -(HDMI)-> JVC RS500
 ```
 
 Now let's add Apex
@@ -46,7 +48,7 @@ I've previously setup the following, which are used by my Apex workflows
 ## Why Two EDID Tables?
 This is a personal preference.
 
-The JVC projectors are known for having horrific delay when switching frame rates or resultions.
+The JVC projectors are known for having horrific delay when switching frame rates or resolutions.
 With some sources, this leads to a very frustrating experience.   For example, hitting Play may
 result in a 15 second delay.  Similarly, pressing Stop (or the content ending) may result in 
 another 15 second delay.  This experience is particularly poor when previewing content.
@@ -54,23 +56,25 @@ another 15 second delay.  This experience is particularly poor when previewing c
 The AppleTV treats different EDID as different displays and remembers the video settings for each.
 Taking advantage of this, my full EDID w/LLDV is used for "Movies" where I want the content
 displayed at the source frame rate.  When this EDID is active, I've configured Apple TV to 
-Match Frame Rate.   My 2nd EDID is used for "Streaming" where I'm willing to watch all content
-in 59.96.  For this EDID I have configured AppleTV to not match frame rate (and use 4k 59.96).
-When using the Streaming EDID, the JVC never has the frustrating 15+ second delays.
+Match Frame Rate and enable Dolby Vision.   My 2nd EDID is used for "Streaming" where I'm willing to watch all content
+in 59.96.  For this EDID I have configured AppleTV to not match frame rate (and use 4k 59.96) 
+and it does not use Dolby Vision.
+When using the Streaming EDID, the JVC never has the frustrating 15+ second delays at the beginning or end
+of content.
 
 ## JVC HDR, LLDV and User Modes
-The LLDV EDID I've geneated is consistent with my JVC HDR 1200 gamma table.  I've configured Vertex 2 to
+The LLDV EDID I've generated is consistent with my JVC HDR 1200 gamma table.  I've configured Vertex 2 to
 send the command to activate this mode via serial (which is then received and processed robustly
 by Apex).  With this setup, when Apple TV enables Dolby Vision, the Vertex 2 will tell Apex to enable
 my HDR 1200 mode.   Apex will then robustly place the JVC RS500 into this mode.
 
 ## JVC SD, HDR and Other Modes
-As an aside, evertyhign is setup for non-LLDV (aka, HDR10 content mastered at ~1200 and ~4000) as
+As an aside, everything is setup for non-LLDV (aka, HDR10 content mastered at ~1200 and ~4000) as
 well as SDR modes.
 
 ## My Current Apex Profiles
 Below are my most commonly used Apex profiles.   These are the profiles to enable Movie mode as well
-as to enable Streaming mode.   The are the same with the exception of the EDID selection.
+as to enable Streaming mode.   These are the same with the exception of the EDID selection.
 
 First the Movie Profile
 
