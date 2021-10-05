@@ -1,8 +1,8 @@
 # How I Use Apex (October 2, 2021)
-I thought it might be useful to share how I used Apex and, in doing so, why Apex ists.
+I thought it might be useful to share how I used Apex and, in doing so, why Apex exists.
 
 ## My Setup
-My equipment is dated but works very well.   The JVC RS500 projector, for example, continues to give excellent results.
+My equipment is a little dated but works very well.   The JVC RS500 projector, for example, continues to give excellent results.
 
 1. JVC RS500 Projector
 2. Onkyo TX-NR818 Receiver
@@ -12,6 +12,9 @@ My equipment is dated but works very well.   The JVC RS500 projector, for exampl
 ## In The Beginning
 When I first created Apex, I was using an NVIDIA Sheild.  However, I've recently
 replaced it with a 2nd generation Apple TV 4K.
+
+With the Shield, Apex would optimization switching between HDR 1200 and HDR 4000 modes.
+As mentioned in the README, one aspect of Apex is that it performs this reliably and does not need "worst case timeouts".
 
 ## How it's connected
 
