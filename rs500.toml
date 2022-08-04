@@ -2,8 +2,16 @@
 name = "rs500"
 protocol = "jvc"
 [protocols.scancodes]
+
+# Note: Codes beginning with 63 are code-b while
+# codes beginning with 73 are code-a
+
 0x632e = "KEY_MENU"
+
+#HDMI 1
 0x6370 = "KEY_1"
+
+#HDMI 2
 0x6371 = "KEY_2"
 
 #FILM-B
@@ -12,5 +20,8 @@ protocol = "jvc"
 #CINEMA-B
 0x6368 = "KEY_4"
 
+#On
 0x6305 = "KEY_F1"
+
+#Off
 0x6306 = "KEY_F2"
