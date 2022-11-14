@@ -20,6 +20,9 @@ protocol = "jvc"
 #CINEMA-B
 0x6368 = "KEY_4"
 
+#NATURAL-B
+0x636A = "KEY_5"
+
 #On
 0x6305 = "KEY_F1"
 
