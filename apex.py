@@ -605,7 +605,7 @@ def apexMain():
         cfg['timeouts']['hdfury_generic_ack'] = 2
 
     if not 'onkyo_iscp_ack' in cfg['timeouts']:
-        cfg['timeouts']['onkyo_iscp_ack'] = 2
+        cfg['timeouts']['onkyo_iscp_ack'] = 10 
 
     if not 'jvcIP' in cfg['timeouts']:
         cfg['timeouts']['jvcIP'] = 0.25
