@@ -40,7 +40,7 @@ class X0HDFuryVertex2Cmd(x0genericcmd.X0GenericCmd):
         timeoutConfig: dictionary that can be used to retrieve the value
         """
 
-        return 3
+        return 15 
 
     def isMatchingAck(self, rxData, opcmd):
         """Takes a value retrieved from the devices and converts it into a value for comparision with the target

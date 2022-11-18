@@ -20,7 +20,7 @@ class AbstractIP(ABC):
         self.connected = False
         self.timeout = timeoutConfig[self.name]
         self.buffer = b''
-        self.chatty = False
+        self.chatty = True 
         self.delimit = delimit
 
     @abstractmethod
@@ -215,7 +215,7 @@ class X0IPGeneric(AbstractIP):
         self.socket = None
         self.connected = False
         self.timeout = timeoutConfig[self.name]
-        self.chatty = False
+        self.chatty = True
         self.buffer = b''
         self.delimit = delimit
 
@@ -247,7 +247,7 @@ class X0IPGeneric(AbstractIP):
             self.socket.close()
             self.socket = None
             self.connected = False
-
+            self.buffer = b''
 
     def send(self,data):
         print('send called')
@@ -298,7 +298,8 @@ class X0IPGeneric(AbstractIP):
 
             rxData = b''
             if not haveit:
-                rxData = self.socket.recv(200)
+                rxData = self.socket.recv(2000)
+                self.log.debug(f'Called recv and got {rxData}')
 
             if (not haveit) and (rxData == b''):
                 # no message in buffer and nothing received from network

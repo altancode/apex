@@ -30,6 +30,8 @@ class X0State:
         self.keepaliveOffset = 5
         self.nextKeepalive = time.time() + self.keepaliveOffset
         self.chatty = False
+        self.changedPJ = False
+        self.onNoChangeMark = None
 
 
     def action(self):
@@ -107,7 +109,7 @@ class X0State:
                             self.state = ''
                             self.desired = None
                             self.checkwaitacktimeout = 0
-
+                            self.changedPJ = False
                             ##
                             ## maybe disconnect and reconnect here?
                             ##
@@ -163,6 +165,7 @@ class X0State:
                             log.info(f'Already set to desired picture mode {misc.getPictureMode(self.desired)} {self.desired}')
                             self.state = ''
                             self.desired = None
+                            self.changedPJ = False
 
                             ## lets try closing the socket so it's opened next time
                             ## May help with unwanted delays when JVC closes the socket
@@ -223,6 +226,7 @@ class X0State:
                     log.info(f'Picture Mode successfully changed to {misc.getPictureMode(self.desired)} {self.desired}')
                     self.state = ''
                     self.desired = None
+                    self.changedPJ = True
 
                     ## lets try closing the socket so it's opened next time
                     ## May help with unwanted delays when JVC closes the socket
@@ -238,23 +242,25 @@ class X0State:
             log.error('**** YIKES {self.state}')
 
 
+        mark = self.onNoChangeMark if (not self.changedPJ) else None
         if not self.desired:
             # we are done
-            return (True,None)
+            return (True,mark)
         else:
             # more to do
-            return (False,None)
+            return (False,mark)
        
 
 
-    def set(self, inDesired, _ignore):
+    def set(self, inDesired, onNoChangeMark):
         
         if inDesired == self.desired:
             # same mode
             log.info(f'Desired picture mode is same as previous {misc.getPictureMode(self.desired)} {self.desired}')
         else:
             self.desired = inDesired
-            log.info(f'Desired picture mode is now {misc.getPictureMode(self.desired)} {self.desired}')
+            self.onNoChangeMark = onNoChangeMark
+            log.info(f'Desired picture mode is now {misc.getPictureMode(self.desired)} {self.desired} {self.onNoChangeMark}')
 
             ## getting this while waiting for results may be an indication
             ## that the JVC will NOT respond

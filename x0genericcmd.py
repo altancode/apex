@@ -162,47 +162,56 @@ class X0GenericCmd(ABC):
 
             # sent ok
             else:
-                # see if there's a response
-                rxData = self.comm.read()
 
-                if rxData == b'':
-                    self.log.debug(f'Got no data')
-                    # got nothing.  Have we timed out?
-                    if time.time() > self.timeout:
-                        # oops.  Start over
-                        self.log.debug(f'Timeout in {self.state}.  {self.checkwaitacktimeout}.  Starting over')
-                        self.state = ''
+                keepGoingCount = 0
+                keepGoing = True
+                while keepGoing:
+                    # see if there's a response
+                    keepGoingCount += 1
+                    self.log.debug(f'Performing a read with keepGoingCount {keepGoingCount}')
+                    rxData = self.comm.read()
 
-                        self.checkwaitacktimeout += 1
-                        if self.checkwaitacktimeout > self.cmdRetries:
-                            # we just give up
-                            self.log.warning(f'Giving up...')
-                            self.desired = None
-                            self.checkwaitacktimeout = 0
+                    if rxData == b'':
+                        keepGoing = False
+                        self.log.debug(f'Got no data')
+                        # got nothing.  Have we timed out?
+                        if time.time() > self.timeout:
+                            # oops.  Start over
+                            self.log.debug(f'Timeout in {self.state}.  {self.checkwaitacktimeout}.  Starting over')
+                            self.state = ''
 
-                else:
-                    self.log.debug(f'Got data {rxData}')
-                    # we got something
-                    self.checkwaitacktimeout = 0
-
-                    if self.isMatchingAck(rxData,self.opcmd):
-                        # got the ack
-                        self.log.debug(f'Got the ACK {rxData}')
-
-                        self.state = ''
-                        self.desired = None
-
-                        result = self.makeCmdResult(rxData)
-
-                        if self.closeOnComplete:
-                            self.log.debug(f'closing connection because closeOnComplete is {self.closeOnComplete}')
-                            self.comm.close()
-
-                        return (True, result)
+                            self.checkwaitacktimeout += 1
+                            if self.checkwaitacktimeout > self.cmdRetries:
+                                # we just give up
+                                self.log.warning(f'Giving up...')
+                                self.desired = None
+                                self.checkwaitacktimeout = 0
 
                     else:
-                        # what happened?
-                        self.log.warning(f'Did not receive expected results with {rxData}.  Ignoring...')
+                        self.log.debug(f'Got data {rxData}')
+                        # we got something
+                        self.checkwaitacktimeout = 0
+
+                        if self.isMatchingAck(rxData,self.opcmd):
+                            # got the ack
+                            self.log.debug(f'Got the ACK {rxData}')
+
+                            keepGoing = False
+
+                            self.state = ''
+                            self.desired = None
+
+                            result = self.makeCmdResult(rxData)
+
+                            if self.closeOnComplete:
+                                self.log.debug(f'closing connection because closeOnComplete is {self.closeOnComplete}')
+                                self.comm.close()
+
+                            return (True, result)
+
+                        else:
+                            # what happened?
+                            self.log.warning(f'Did not receive expected results with {rxData}.  Ignoring...')
 
         else:
             self.log.error('**** YIKES {self.state}')

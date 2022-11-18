@@ -11,7 +11,6 @@ from logging.handlers import RotatingFileHandler
 import x0state
 import x0ip
 import x0serial
-import x0state
 import misc
 import x0genericcmd
 import x0opcmd
@@ -23,11 +22,13 @@ import x0smarthdmi
 import x0delay
 import x0hdfurymode
 import x0gammadstate
+import x0valuestate
 import traceback
 import importlib
 import pkgutil
 from pprint import pformat
 from pprint import pprint
+import pdb
 
 ## Constants
 
@@ -42,14 +43,15 @@ POWER_POWEROFF = 2
 class ApexTaskEntry():
     """Class to hold values"""
 
-    def __init__(self, who, what, why, requirePower):
+    def __init__(self, who, what, why, requirePower, group):
         self.who = who
         self.what = what
         self.why = why
         self.requirePower = requirePower
+        self.group = group
 
     def __str__(self):
-        return f'ApexTaskEntry {self.who} {self.what} {self.why} {self.requirePower}'
+        return f'ApexTaskEntry Who={self.who} What={self.what} Why={self.why} requirePower={self.requirePower} group={self.group}'
 
    
 ##
@@ -57,6 +59,8 @@ class ApexTaskEntry():
 ##
 
 log = None
+
+groupGlobal = 1
 
 ##
 ## code
@@ -89,6 +93,10 @@ def convertPowerReq(op, defaultIfMissing=True):
 
 def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
     """takes a profile name and queues the associated commands"""
+
+    global groupGlobal
+    localGroup = groupGlobal
+    groupGlobal += 1
 
     jvcip = cmdTargets.get('jvc_pj')['conn']
 #    hdfuryip = targetIPs.get('hdfury_generic', None)
@@ -131,7 +139,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     if b != None:
                         obj = cmdTarget['cmdobj'](cmdTarget['conn'], log, cfg['timeouts'])
 #                        obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
-                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True)))
+                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True), localGroup))
                 else:
                     log.warning(f'Cannot parse operation {op}')
 
@@ -152,14 +160,22 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     if b:
                         log.debug(f'profile result {b}')
                         obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                        localQueue.append( ApexTaskEntry(obj,('RC',b), 'user', convertPowerReq(op, True) ))
+                        localQueue.append( ApexTaskEntry(obj,('RC',b), 'user', convertPowerReq(op, True), localGroup ))
 
                 elif op.get('op') == 'apex-hdfurymode' and type(op.get('data')) == str:
                     data = op.get('data')
                     log.debug(f'apex-hdfurydelay result {data}')
                     obj = x0hdfurymode.X0HDFuryMode(log)          
                     # note we default the requirePowerOn to be FALSE here
-                    localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False) ))
+                    localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False), localGroup ))
+
+                elif op.get('op') == 'apex-mark' and type(op.get('data')) == str:
+                    # this is the command that appears in the profile
+                    data = op.get('data')
+                    log.debug(f'apex-mark result {data}')
+                    obj = x0valuestate.X0ValueState(log)          
+                    # note we default the requirePowerOn to be FALSE here
+                    localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-mark', convertPowerReq(op, False), localGroup ))
 
                 elif op.get('op') == 'apex-ongammad' and type(op.get('data')) == str:
                     # this is the command that appears in the profile
@@ -167,7 +183,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     log.debug(f'apex-ongammad result {data}')
                     obj = x0gammadstate.X0GammaDState(log)          
                     # note we default the requirePowerOn to be FALSE here
-                    localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-ongammad', convertPowerReq(op, False) ))
+                    localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-ongammad', convertPowerReq(op, False), localGroup ))
 
                 elif op.get('op') == 'apex-delay' and type(op.get('data')) == str:
                     data = op.get('data')
@@ -181,7 +197,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     if val:
                         log.debug(f'apex-delay result {val}')
                         obj = x0delay.X0Delay(jvcip, log, cfg['timeouts'])          
-                        localQueue.append(ApexTaskEntry(obj, (val, None), 'user', convertPowerReq(op, True) ))
+                        localQueue.append(ApexTaskEntry(obj, (val, None), 'user', convertPowerReq(op, True), localGroup ))
 
                 elif op.get('op') == 'apex-hdmi' and type(op.get('data')) == str:
                     data = op.get('data')
@@ -191,7 +207,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
 
                     log.debug(f'apex-hdmi result {cmd}')
                     obj = x0smarthdmi.X0SmartHDMI(jvcip, log, cfg['timeouts'])          
-                    localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', convertPowerReq(op, True) ))
+                    localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', convertPowerReq(op, True), localGroup ))
 
                 elif op.get('op') == 'apex-power' and type(op.get('data')) == str:
                     data = op.get('data')
@@ -204,7 +220,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     log.debug(f'apex-power result {cmd}')
                     obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])          
                     # localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', reqPower ))
-                    localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', POWER_POWERANY ))
+                    localQueue.append(ApexTaskEntry(obj, (cmd, None), 'user', POWER_POWERANY, localGroup ))
                 
                 elif op.get('op') == 'apex-pm' and type(op.get('data')) == str:
                     data = op.get('data')
@@ -214,9 +230,16 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     except Exception as ex:
                         log.error(f'Cannot convert data to binary {data} {ex}')
 
+                    onNoChange = op.get('onNoChange')
+                    # this will be the mark name (as a string) or None
+                    if onNoChange:
+                        if type(onNoChange) != str:
+                            log.warning(f'apex-pm onNoChange was not a string {type(onNoChange)} {onNoChange}')
+                            noNoChange = None
+
                     if b:
-                        log.debug(f'apex-pm profile result {b}')
-                        localQueue.append(ApexTaskEntry(stateHDR, (b, None), 'user', convertPowerReq(op, True) ))
+                        log.debug(f'apex-pm profile result {b} with onNoChange {onNoChange}')
+                        localQueue.append(ApexTaskEntry(stateHDR, (b, onNoChange), 'user', convertPowerReq(op, True), localGroup ))
 
                 elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('data')) == str:
                     cmd = op.get('cmd')
@@ -238,7 +261,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                         log.debug(f'profile result {cmd} {b}')
     #                    obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                         obj = x0opcmd.X0OpCmd(jvcip, log, updatedTimeouts)
-                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
+                        localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True), localGroup ))
 
                 elif op.get('op') == 'raw' and type(op.get('cmd')) == str and type(op.get('numeric')) == int:
                     log.debug(f'inside number with {op}')
@@ -258,7 +281,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                         if b:
                             log.debug(f'profile result {cmd} {b}')
                             obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
-                            localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True) ))
+                            localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True), localGroup ))
 
                 else:
                     log.warning(f'Cannot parse operation {op}')
@@ -287,7 +310,7 @@ def addPowerCheck(inlist, jvcip, log, cfg):
     outlist = []
     for x in inlist:
         obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-        outlist.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False))
+        outlist.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False, x.group))
         outlist.append(x)
 
     return outlist
@@ -296,13 +319,18 @@ def addPowerCheck(inlist, jvcip, log, cfg):
 def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinput, profiles, secret):
     """Main loop which recevies HDFury data and intelligently acts upon it"""
 
+    global groupGlobal
+
     jvcip = cmdTargets.get('jvc_pj')['conn']
 #    hdfuryip = targetIPs.get('hdfury_generic', None)
 #    onkyoip = targetIPs.get('onkyo_iscp', None)
 
+    skipUntilMark = None
     watchGammaD = False
     nextGammaDTime = 0
     gammaDProfile = ''
+
+    ignoreGroupList = set()
 
     testOnetime = False
     taskQueue = []
@@ -317,7 +345,7 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
 
     # Start by asking the JVC model
     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-    taskQueue.append(ApexTaskEntry(obj,('MD',b''), 'boot-model', False))
+    taskQueue.append(ApexTaskEntry(obj,('MD',b''), 'boot-model', False, 1))
 
     # # and ask the HDFury something
     # obj = x0genericcmd.X0HDFuryVertex2Cmd(hdfuryip, log, cfg['timeouts'])
@@ -397,6 +425,16 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                                 log.info(f'Noticed Gamma D!  Adding profile "{gammaDProfile}"" to queue')
                                 taskQueue = taskQueue + singleProfile2cmd(gammaDProfile, profiles, cmdTargets, log, cfg, stateHDR)
 
+                    elif currentState.who == stateHDR:
+                        # this command returns whether the picture mode state changed in rsp
+                        # if it didn't change, we potentially want to skip commands until mark is found
+                        # rsp will be None or the mark we should skip to
+                        if rsp:
+                            # there's a mark we need to skip to
+                            # rsp holds the name
+                            log.debug(f'Enabling skipUntilMark {rsp}')
+                            skipUntilMark = rsp
+
             if finished:
                 # get the next one to process
                 currentState = None
@@ -411,9 +449,26 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                         ((jvcPowerState == POWER_POWERON) and (next.requirePower == POWER_POWEROFF)):
                         log.debug(f'Not performing operation because jvcPowerState is {jvcPowerState} and {next}')
                     else:
-                        currentState = next
-                        log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
-                        currentState.who.set(next.what[0],next.what[1])
+
+                        if skipUntilMark != None:
+                            # we might skip this until we see the mark command
+                            if (next.why == 'apex-mark') and (next.what[0] == skipUntilMark ):
+                                # we found the matching mark
+                                log.debug(f'Found the matching mark {skipUntilMark}')
+                                skipUntilMark = None
+
+                        if skipUntilMark == None:
+
+                            if next.group not in ignoreGroupList:
+                                currentState = next
+                                log.debug(f'Next operation is class {type(next.who)} w/{next.what}')
+                                currentState.who.set(next.what[0],next.what[1])
+                            else:
+                                log.info(f'Ignoring operation because its group {next.group} is in ignoreGroupList. Got class {type(next.who)} w/{next.what} and {next.group}')
+
+                        else:
+                            log.info(f'Skipping operation because we are looking for mark {skipUntilMark}. Got class {type(next.who)} w/{next.what}')
+
 
             if currentState == None:
                 # empty stuff we don't want, such as stale responses or keep alive ack
@@ -421,9 +476,13 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
 
                 # maybe schedule a gammad check?
                 if watchGammaD and time.time() > nextGammaDTime:
+
+                    localGroup = groupGlobal
+                    groupGlobal += 1
+
                     log.debug(f'adding gammad check to queue')
                     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
-                    taskQueue.append(ApexTaskEntry(obj,('PM',b'GT'), 'apex-gammadcheck', True))
+                    taskQueue.append(ApexTaskEntry(obj,('PM',b'GT'), 'apex-gammadcheck', True, localGroup))
 
                     # this is the soonest it can happen again, but it could be later if the queue has multiple enttries
                     nextGammaDTime = time.time() + 1
@@ -455,13 +514,34 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                         if followHDFury:
                             log.info(f'HDFury said to activate profile {profileName} ({pm})')
 
-                            if currentState and currentState.who == stateHDR:
-                                # as an optimization we just change the currently running state
-                                # this keeps the behavior we had prior
-                                log.debug(f'Switching stateHDR in mid flight to {pm}')
-                                stateHDR.set(pm,None)
-                            else:
-                                taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, cmdTargets, log, cfg, stateHDR), jvcip, log, cfg)
+                            #if currentState and currentState.who == stateHDR:
+                            #    # as an optimization we just change the currently running state
+                            #    # this keeps the behavior we had prior
+                            #    log.debug(f'Switching stateHDR in mid flight to {pm}')
+                            #    stateHDR.set(pm,None)
+                            #else:
+                            #    taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, cmdTargets, log, cfg, stateHDR), jvcip, log, cfg)
+
+                            ## AJS
+                            # this is where we need to look to see if there's already a picture mode profile in our queue
+                            # as well as any commands in that same group
+                            # we delete all those commands in the same group
+                            # and then append
+                            # note that we shouldn't do anything if the picture mode appears in the FIRST group as it may already be in progress???
+
+                            for x in taskQueue:
+                                log.debug(f'Comparing {x.who} to {x0state}')
+
+#                                pdb.set_trace()
+
+                                if isinstance(x.who, x0state.X0State):
+                                    log.info(f'Found existing PM in queue, adding its group {x.group} to ignore')
+                                    ignoreGroupList.add(x.group)
+
+                            log.debug(f'ignoreGroupList is size {len(ignoreGroupList)} and is {ignoreGroupList}')
+
+                            taskQueue = taskQueue + addPowerCheck(singleProfile2cmd(profileName, profiles, cmdTargets, log, cfg, stateHDR), jvcip, log, cfg)
+
                         else:
                             log.debug(f'Ignoring HDFury request to activate profile {profileName} ({pm})') 
                     else:
@@ -488,8 +568,11 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
             if testOnetime:
                 testOnetime = False
 
+                localGroup = groupGlobal
+                groupGlobal += 1
+
                 obj = x0smartpower.X0SmartPower(jvcip, log, cfg['timeouts'])
-                taskQueue.append(ApexTaskEntry(obj,('off',b''), 'user', False))
+                taskQueue.append(ApexTaskEntry(obj,('off',b''), 'user', False, localGroup))
 
             #     obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
             #     taskQueue.append(ApexTaskEntry(obj,('PW',b''), 'apex-checkpower', False))
@@ -605,7 +688,7 @@ def apexMain():
         cfg['timeouts']['hdfury_generic_ack'] = 2
 
     if not 'onkyo_iscp_ack' in cfg['timeouts']:
-        cfg['timeouts']['onkyo_iscp_ack'] = 2
+        cfg['timeouts']['onkyo_iscp_ack'] = 10 
 
     if not 'jvcIP' in cfg['timeouts']:
         cfg['timeouts']['jvcIP'] = 0.25
