@@ -92,6 +92,7 @@ class X0IPJVC(AbstractIP):
             self.socket.close()
             self.socket = None
             self.connected = False
+            self.buffer = b''
 
 
     def send(self,data):
@@ -118,6 +119,10 @@ class X0IPJVC(AbstractIP):
             return False
 
     def read(self, emptyIt = False):
+        if emptyIt and (not self.connected):
+            # if we aren't connected then there's nothing to do for emptyIt
+            return b''
+        
         try:
             if not self.connected:
                 self.log.debug(f'read called but not connected')
