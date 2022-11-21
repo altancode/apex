@@ -255,7 +255,7 @@ class X0IPGeneric(AbstractIP):
             self.buffer = b''
 
     def send(self,data):
-        print('send called')
+        self.log.debug('send called')
         try:
             if not self.connected:
                 self.log.debug(f'send called but not connected')
@@ -276,12 +276,12 @@ class X0IPGeneric(AbstractIP):
             self.log.debug(f'socket send exception {ex}')
             self.close()
 
-            print(f'returning false')
+            self.log.debug(f'returning false')
             return False
 
 
     def read(self, emptyIt = False):
-        print(f'read called')
+        self.log.debug(f'read called')
         try:
             if not self.connected:
                 self.log.debug(f'read called but not connected')
