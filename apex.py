@@ -336,9 +336,27 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
     taskQueue = []
     currentState = None
 
+    TENYEARS = 31556952 * 10
+
     chatty = False
-    keepaliveOffset = 10
-    nextKeepalive = time.time() + keepaliveOffset
+
+    useJVCKeepAlive = cfg['useJVCKeepAlive']
+    JVCKeepAliveOffset = 10
+    nextJVCKeepalive = time.time() + JVCKeepAliveOffset
+    if useJVCKeepAlive:
+        log.info(f'JVC Keep Alives are active')
+    else:
+        log.info(f'JVC Keep Alives are NOT ACTIVE')
+
+    disconnectAfterJVCIdle = cfg['disconnectAfterJVCIdle']
+    if disconnectAfterJVCIdle != 0:
+        noJVCActivityOffset = disconnectAfterJVCIdle
+        log.info(f'Disconnect after JVC idle is enabled')
+    else:
+        noJVCActivityOffset = TENYEARS
+        log.info(f'Disconnect after JVC idle is NOT ENABLED')
+
+    noJVCActivityTimer = time.time() + noJVCActivityOffset
 
     followHDFury = True
     jvcPowerState = POWER_POWEROFF
@@ -435,6 +453,12 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                             log.debug(f'Enabling skipUntilMark {rsp}')
                             skipUntilMark = rsp
 
+                    log.info(f'*** FINISHED COMMAND ***')
+
+                    # set the no activity timer
+                    noJVCActivityTimer = time.time() + noJVCActivityOffset
+                    log.debug(f'No activity timer set to now +{noJVCActivityOffset} seconds')
+
             if finished:
                 # get the next one to process
                 currentState = None
@@ -488,7 +512,7 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                     nextGammaDTime = time.time() + 1
                 else:                
                     # check if keepalive time
-                    if time.time() > nextKeepalive:
+                    if useJVCKeepAlive and (time.time() > nextJVCKeepalive):
                         # it is!
                         cmd = b'!\x89\x01\x00\x00\n'
                         if chatty:
@@ -497,7 +521,15 @@ def processLoop(cfg, cmdTargets, vtxser, stateHDR, slowdown, netcontrol, keyinpu
                         if not ok:
                             log.warning(f'Unable to send keep alive')
                 
-                        nextKeepalive = time.time() + keepaliveOffset
+                        nextJVCKeepalive = time.time() + JVCKeepAliveOffset
+
+                    # check no activity timer
+                    if time.time() > noJVCActivityTimer:
+                        log.debug(f'No activity timer expired, closing JVC socket')
+                        jvcip.close()
+
+                        # set no activity timer for a year form now (basically disable until some sets it)
+                        noJVCActivityTimer += TENYEARS
 
             if vtxser:
                 rxData = vtxser.read()
@@ -714,6 +746,12 @@ def apexMain():
     if not 'slowdown' in cfg:
         cfg['slowdown'] = 0
 
+    if not 'useJVCKeepAlive' in cfg:
+        cfg['useJVCKeepAlive'] = False
+
+    if not 'disconnectAfterJVCIdle' in cfg:
+        cfg['disconnectAfterJVCIdle'] = 10
+
     # if not 'netcontrolport' in cfg:
     #     cfg['netcontrolport'] = 0
 
@@ -728,7 +766,7 @@ def apexMain():
     if 'jvc_pj' in cfg:
         log.info(f'Connecting to JVC')
         jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvc_pj']['ip'], cfg['jvc_pj']['port']), log, cfg['timeouts'])
-        jvcip.connect()
+#        jvcip.connect()
         cmdTargets['jvc_pj'] = { 'conn': jvcip } 
     else:
         log.warning('No jvc_pj configured')

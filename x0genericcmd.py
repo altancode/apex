@@ -98,7 +98,7 @@ class X0GenericCmd(ABC):
             self.opcmd = self.makeOpCmd()
 
             self.state = 'waitACK'
-            print(f'Setting timeout')
+            self.log.debug(f'Setting timeout')
             self.timeout = time.time() + self.refAckOffset    
 
             self.state = 'sendCmd'
@@ -113,7 +113,7 @@ class X0GenericCmd(ABC):
 
             # send the command
             ok = self.comm.send(self.opcmd)
-            print(f'OK is {ok}')
+            self.log.debug(f'OK is {ok}')
             if not ok:
                 # do not move to next state!
                 # basically we'll try again next time
@@ -195,6 +195,7 @@ class X0GenericCmd(ABC):
                         if self.isMatchingAck(rxData,self.opcmd):
                             # got the ack
                             self.log.debug(f'Got the ACK {rxData}')
+                            self.log.info(f'Successfully performed {rxData}')
 
                             keepGoing = False
 

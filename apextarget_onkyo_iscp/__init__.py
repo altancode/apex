@@ -92,7 +92,7 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
             match = (wantedRest == gotRest)
 
             if match:
-                self.log.debug(f'Match.\nwantedRest {wantedRest}\n   getRest {gotRest}')
+                self.log.debug(f'Match!  wantedRest {wantedRest} gotRest {gotRest}')
 
 
         if not match:
