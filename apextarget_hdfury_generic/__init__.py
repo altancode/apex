@@ -60,11 +60,11 @@ class X0HDFuryVertex2Cmd(x0genericcmd.X0GenericCmd):
         rx = rxData.split(b' ')[0]
         op = opcmd.split(b' ')[1]
 
-        match = rx = op
+        match = (rx == op)
         if match:
-            self.log.debug('Match!')
-
-        self.log.debug(f'\nrx {rx}\nop {op}')
+            self.log.debug(f'Match!  Got {rx} and wanted {op}')
+        else:
+            self.log.debug(f'No match!  Got {rx} and wanted {op}')
 
         return rx == op
 
