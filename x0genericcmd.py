@@ -195,6 +195,7 @@ class X0GenericCmd(ABC):
                         if self.isMatchingAck(rxData,self.opcmd):
                             # got the ack
                             self.log.debug(f'Got the ACK {rxData}')
+                            self.log.info(f'Successfully performed {rxData}')
 
                             keepGoing = False
 
