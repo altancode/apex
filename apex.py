@@ -23,6 +23,7 @@ import x0delay
 import x0hdfurymode
 import x0gammadstate
 import x0valuestate
+import x0smartsource
 import traceback
 import importlib
 import pkgutil
@@ -169,6 +170,14 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     # note we default the requirePowerOn to be FALSE here
                     localQueue.append(ApexTaskEntry(obj, (data, None), 'apex-hdfurymode', convertPowerReq(op, False), localGroup ))
 
+                elif op.get('op') == 'apex-source' and type(op.get('data')) == str:
+                    # this is the command that appears in the profile
+                    data = op.get('data')
+                    log.debug(f'apex-source result {data}')
+
+                    obj = x0smartsource.X0SmartSource(jvcip, log, cfg['timeouts'])          
+                    localQueue.append(ApexTaskEntry(obj, (data, None), 'user', convertPowerReq(op, False), localGroup ))
+
                 elif op.get('op') == 'apex-mark' and type(op.get('data')) == str:
                     # this is the command that appears in the profile
                     data = op.get('data')
@@ -282,6 +291,14 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                             log.debug(f'profile result {cmd} {b}')
                             obj = x0opcmd.X0OpCmd(jvcip, log, cfg['timeouts'])
                             localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True), localGroup ))
+
+                elif op.get('op') == 'rawr' and type(op.get('data')) == str:
+                    log.debug(f'Inside rawr {op}')
+                    data = op.get('data')
+
+                    log.debug(f'profile result {data}')
+                    obj = x0refcmd.X0RefCmd(jvcip, log, cfg['timeouts'])
+                    localQueue.append(ApexTaskEntry(obj,(data,b''), 'user', convertPowerReq(op, True), localGroup ))
 
                 else:
                     log.warning(f'Cannot parse operation {op}')
