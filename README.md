@@ -10,9 +10,11 @@ Apex is a powerful tool to control your JVC projector and other devices.   Apex 
 
 The latest release has 3 significant changes.
 
-1. In addition to controlling the JVC, Apex now supports Operational Targets for commands.  Currently Onkyo's ISCP and HDFury's Generic IP are supported.
-1. There is a new configuration format.   This is not backward but allows more consistent configurations for Targets.
-1. Configurations can be broken into 2 separate files where settings in the 2nd file overwrite those in the first
+1. Picture Mode changes have been optimized.   If there is already a picture mode change request in the Apex queue and another picture mode change is requested, only the latest will be processed.
+
+2. Apex no longer holds the IP connection to the JVC projector.  This allows non-Apex IP operation to occur.  It also has the side effect of making JVC IR remote commands much more robust.
+
+3. Added ability to skip over profile operations when a picture moded change is required but not needed (already in that picture mode).  For those using custom picture mode profiles, this allows the custom operations to be skipped when the picture mode does not need changing.
 
 # Using Apex Example
 
@@ -213,6 +215,32 @@ parameter to picture mode names.
   - op: apex-pm
     data: '00'
 ```
+
+The apex-pm operation also supports a field called "onNoChange", which is optional.   If this field is specified and the requested picture mode requires no change to the projector (because the projector is already in that mode), Apex will skip all operations thath follow until a "pm-mark" operation is found with a matching string.
+
+## "apex-mark" operation
+The mark operation currently only works in conjunction with the apex-pm operation.   "apex-mark" specifies a "mark" (or location) in the profile.   This allows Apex to skip all operations prior to the mark.   When using apex-mark, a "data" field must exist.   This contains a string that uniquely identifies the mark.
+
+The following is an example use of apex-mark in a custom picture mode profile.
+
+```
+_APEX_PMUser1:
+  - op: apex-pm
+    data: '0C'
+    onNoChange: 'Mark_Jump'
+  - op: apex-delay
+    data: '4000'
+  - op: raw
+    cmd: PMDI
+    data: '0'
+  - op: raw
+    cmd: PMLA
+    numeric: -15
+  - op: apex-mark
+    data: 'Mark_Jump'
+```
+
+This example says "if there is no change needed when selecting picture mode "User1", jump to the mark with the name "Mark_Jump" (skipping all the operations in-between).  However, if the JVC was in a picture mode other than "User1", all operations would be performed (delaying 4s, disabling the dynamic iris, setting the iris to -15).
 
 ## "apex-hdmi" operation
 Special sauce?   Yes.   Using the operation apex-hdmi avoids activating a HDMI input if it's already active.   The data parameter 
