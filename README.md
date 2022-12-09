@@ -224,7 +224,7 @@ The mark operation currently only works in conjunction with the apex-pm operatio
 The following is an example use of apex-mark in a custom picture mode profile.
 
 ```
-_APEX_PMUser1:
+  _APEX_PMUser1:
   - op: apex-pm
     data: '0C'
     onNoChange: 'Mark_Jump'
