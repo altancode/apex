@@ -216,7 +216,7 @@ parameter to picture mode names.
     data: '00'
 ```
 
-The apex-pm operation also supports a field called "onNoChange", which is optional.   If this field is specified and the requested picture mode requires no change to the projector (because the projector is already in that mode), Apex will skip all operations thath follow until a "pm-mark" operation is found with a matching string.
+The apex-pm operation also supports a field called "onNoChange", which is optional.   If this field is specified and the requested picture mode requires no change to the projector (because the projector is already in that mode), Apex will skip all operations that follow until a "pm-mark" operation is found with a matching string.
 
 ## "apex-mark" operation
 The mark operation currently only works in conjunction with the apex-pm operation.   "apex-mark" specifies a "mark" (or location) in the profile.   This allows Apex to skip all operations prior to the mark.   When using apex-mark, a "data" field must exist.   This contains a string that uniquely identifies the mark.
