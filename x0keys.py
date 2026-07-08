@@ -53,7 +53,7 @@ class x0Keys:
         if inkeymap:
             for key in inkeymap.keys():
                 try:
-                    code = eval('ecodes.' + key)
+                    code = getattr(ecodes, key)
                     mapping[code] = inkeymap[key]
                 except Exception as ex:
                     self.log.error(f'Unable ot map {key} {ex}')

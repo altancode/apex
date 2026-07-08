@@ -137,6 +137,16 @@ you need to comment out the "hdfury" line in the apex.yaml file.
 1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, inside the "jvc_pj" object, change "ip" parameter to be the IP of the JVC projector and within the "hdfury_serial" change "devie" to be the serial device name of the HDFury device.
 1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex is listen on for external commands.  Also change 
 "netcontrolsecret" to a secret value for your specific setup.
+1. If your JVC's network control has a password set, set the "password" field under "jvc_pj" to that password, in plain text.  Apex computes the required SHA-256 hash itself:
+
+```
+jvc_pj:
+  ip: '192.168.10.202'
+  port: 20554
+  password: '1234567890'
+```
+
+If "password" is omitted, Apex connects exactly as before (no authentication).
 1. Eventually you'll want to have Apex start automatically, but to get started you can simply use "python3 apex.py"
 
 # HDFury Setup

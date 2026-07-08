@@ -244,7 +244,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                     if onNoChange:
                         if type(onNoChange) != str:
                             log.warning(f'apex-pm onNoChange was not a string {type(onNoChange)} {onNoChange}')
-                            noNoChange = None
+                            onNoChange = None
 
                     if b:
                         log.debug(f'apex-pm profile result {b} with onNoChange {onNoChange}')
@@ -782,7 +782,7 @@ def apexMain():
 
     if 'jvc_pj' in cfg:
         log.info(f'Connecting to JVC')
-        jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvc_pj']['ip'], cfg['jvc_pj']['port']), log, cfg['timeouts'])
+        jvcip = x0ip.X0IPJVC('jvcIP', (cfg['jvc_pj']['ip'], cfg['jvc_pj']['port']), log, cfg['timeouts'], password=cfg['jvc_pj'].get('password'))
 #        jvcip.connect()
         cmdTargets['jvc_pj'] = { 'conn': jvcip } 
     else:
