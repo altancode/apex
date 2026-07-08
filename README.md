@@ -2,9 +2,9 @@
 
 Apex is a powerful tool to control your JVC projector and other devices.   Apex offers several great features.  
 
-Apex started life as a tool to deeply control JVC projectors with a focus on assisting with the challenges of early HDR support in JVC projectors.   While that need to gone away, Apex is still extremely useful because it allows robust control of the JVC projector.
+Apex started life as a tool to deeply control JVC projectors with a focus on assisting with the challenges of early HDR support in JVC projectors.   While that need has gone away, Apex is still extremely useful because it allows robust control of the JVC projector.
 
-1. Apex enable reliable and robust control of the JVC projector.  JVC projectors are known for ignoring commands "when they are busy."  If you tell Apex, for example, to power off the JVC while it's "attempting to sync to a new video format", Apex will ensure the projector powers off.   Apex is the opposite of a "toss the command to the projector and hope it does it" solution.
+1. Apex enables reliable and robust control of the JVC projector.  JVC projectors are known for ignoring commands "when they are busy."  If you tell Apex, for example, to power off the JVC while it's "attempting to sync to a new video format", Apex will ensure the projector powers off.   Apex is the opposite of a "toss the command to the projector and hope it does it" solution.
 1. Apex allows deep control of the JVC using both network connectivity and IR.   You can tell the projector to do any command it supports.
 1. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP, HDFury's IP protocol and the very powerful ability to execute shell commands
 
@@ -14,7 +14,7 @@ Keep in mind that Apex does a lot of things, but if you only want to use it to r
 
 # What's New?
 
-The latest release has 3 significant changes.
+The latest release has the following changes.
 
 1. Support for newer JVC projectors requiring a SHA hash of a password
 1. Small internal improvements
@@ -81,7 +81,7 @@ As an example of using "target", the following operation changes an Onkyo receiv
     data: '3C'
 ```
 
-For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
+For backward compatibility, if the target is not specified then it is assumed to be "jvc_pj"
 
 # Apex Setup
 
@@ -94,8 +94,8 @@ you need to comment out the "hdfury" line in the apex.yaml file.
 1. Create a directory somewhere called apex
 1. Retrieve Apex from the Repo
 1. Install the requirements using "pip3 install -r requirements.txt"
-1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, inside the "jvc_pj" object, change "ip" parameter to be the IP of the JVC projector and within the "hdfury_serial" change "devie" to be the serial device name of the HDFury device.
-1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex is listen on for external commands.  Also change 
+1. Configure Apex with the IP address of your JVC and the device name of your serial port.  In the apex.yaml file, inside the "jvc_pj" object, change "ip" parameter to be the IP of the JVC projector and within the "hdfury_serial" change "device" to be the serial device name of the HDFury device.
+1. Configure Apex for network control.  In the apex.yaml file, change "netcontrolport" to the port that Apex listens on for external commands.  Also change 
 "netcontrolsecret" to a secret value for your specific setup.
 1. If your JVC's network control has a password set, set the "password" field under "jvc_pj" to that password, in plain text.  Apex computes the required SHA-256 hash itself:
 
@@ -120,7 +120,7 @@ If you don't know how the serial ports are named on the device running Apex, you
 1. Make sure the HDFury device's serial output is connected to the device running Apex.  If you use a serial extension cable, ensure it is a straight serial cable (NOT a NULL modem cable).  
 1. Set the Macro "Sync Delay (secs)" to be 1.  I wish it could be set to 0, but the HDFury does not work correctly when 0 is specified.
 1. Make sure the Macro "Send on every sync" is checked. 
-1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device is save the new settings.
+1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device to save the new settings.
 
 # Onkyo ISCP Command Target Setup
 
@@ -176,9 +176,9 @@ the default behavior.
 The profile operations are described below.
 
 ## "apex-pm" operation
-This is Apex special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
+This is Apex's special sauce state machine that optimizes picture mode selection.  If you want to select a picture mode, you
 should use apex-pm instead of alternative methods.   When using apex-pm, a "data" field must exist.  This indicates which picture mode
-to activate.   The optional parameter "requirePowerOn" is supported.  See the default apex.yanl file for the mapping of the data
+to activate.   The optional parameter "requirePowerOn" is supported.  See the default apex.yaml file for the mapping of the data
 parameter to picture mode names.
 
 ```
@@ -188,7 +188,7 @@ parameter to picture mode names.
     data: '00'
 ```
 
-The apex-pm operation also supports a field called "onNoChange", which is optional.   If this field is specified and the requested picture mode requires no change to the projector (because the projector is already in that mode), Apex will skip all operations that follow until a "pm-mark" operation is found with a matching string.
+The apex-pm operation also supports a field called "onNoChange", which is optional.   If this field is specified and the requested picture mode requires no change to the projector (because the projector is already in that mode), Apex will skip all operations that follow until an "apex-mark" operation is found with a matching string.
 
 ## "apex-mark" operation
 The mark operation currently only works in conjunction with the apex-pm operation.   "apex-mark" specifies a "mark" (or location) in the profile.   This allows Apex to skip all operations prior to the mark.   When using apex-mark, a "data" field must exist.   This contains a string that uniquely identifies the mark.
@@ -263,10 +263,10 @@ When set to "follow", Apex will act upon HD Fury HDR modes and when set to "igno
 When using apex-hdfurymode, a "data" field must exist.  It must be set to either "follow" or "ignore".   
 
 The optional parameter "requirePowerOn" is supported.  However, the default is set to False (meaning this command is 
-process regardless of the JVC power state).
+processed regardless of the JVC power state).
 
 ```
-  # Apex will use (aka use) the HDR info provided from HD Fury
+  # Apex will follow the HDR info provided from HD Fury
   - op: apex-hdfurymode
     data: 'follow'
 ```
@@ -297,7 +297,7 @@ with a profile.
     data: ''
 ```
 
-If the apex-ongammad operation os used, it is very important that the specified profile performs
+If the apex-ongammad operation is used, it is very important that the specified profile performs
 actions that cause the gamma table to change.   If not, Apex will keep noticing Gamma D and keep
 performing the operations in the profile over and over.
 
@@ -331,7 +331,7 @@ Here is an example of a raw command with data
     data: '5'
 ```
 
-Here is the same example as above but with the (not recommended for cause use) timeout parameter.   The timeout
+Here is the same example as above but with the (not recommended for casual use) timeout parameter.   The timeout
 is set to 5000 ms (or 5 seconds)
 
 ```
@@ -355,7 +355,7 @@ Here is an example rccode that displays (or removes) the "Menu"
     data: '732E'
 ```
 
-That that many older documents pertaining to remote control code often include only a single hex value, such as 2E.  In most
+Note that many older documents pertaining to remote control code often include only a single hex value, such as 2E.  In most
 cases you can make those work by simply adding 73 to the front (resulting in 732E).  The full 4 character code is supported by 
 Apex because it allows remote control codes to operate when the JVC is configured for "Code B" (opposed to "Code A") IR codes.
 If you want to send "Code B" commands, replace the 73 with 63.
@@ -375,7 +375,7 @@ The Onkyo ISCP Command Target supports raw commands.  Below is an example that p
 
 ## HDFury Generic IP Command Target
 
-The HDFury Generic Command Target supports raw commands.  Below is an example that selects enables splitter mode with input 1 selected.
+The HDFury Generic Command Target supports raw commands.  Below is an example that enables splitter mode with input 1 selected.
 
 ```
   - op: raw
@@ -525,7 +525,7 @@ Using this new configuration format, the new targets are configured using
 
 With this release, Apex supports 2 configuration files, Config1 and Config2.   Any parameters
 placed into Config2 will replace anything that already exists in Config1.  This two configuration
-file approach should allow uses to keep their customizations in a file separate from the official
+file approach should allow users to keep their customizations in a file separate from the official
 Apex release while still using settings or parameters that exist in the default configuration.
 
 In order to use the second configuration file, the new command line parameter "-configfile2" (or "-cf2")
@@ -533,7 +533,7 @@ has been added.
 
 # Tips
 
-If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "showserialports" and it will output the potential serial ports
+If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "--showserialports" and it will output the potential serial ports
 
 # Discussion?
 
@@ -560,11 +560,11 @@ Apex removes the need to connect a serial cable to the JVC because Apex communic
 
 # Is Apex Right for Me?
 
-Apex may be right of you if...
+Apex may be right for you if...
 * You are currently using, or plan to use, a JVC RS500/600 projector with an HDFury device to enable proper HDR?   
 * Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
 * You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
-* You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
+* You are annoyed by HDR modes activating or deactivating with seemingly random delays after starting or stopping content? 
 * Your JVC does not reliably turn on or off and you'd like rock solid behavior?
 * You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
 * Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
