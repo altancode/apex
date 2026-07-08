@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 import socket
+import hashlib
 
 ##
 ## code
@@ -44,7 +45,7 @@ class AbstractIP(ABC):
 class X0IPJVC(AbstractIP):
     """IP connectivity to JVC"""
 
-    def __init__(self, name, peer, useLog, timeoutConfig, delimit = None):
+    def __init__(self, name, peer, useLog, timeoutConfig, delimit = None, password = None):
         self.name = name
         self.log = useLog
         self.peer = peer
@@ -55,6 +56,7 @@ class X0IPJVC(AbstractIP):
         self.buffer = b''
         self.ignoreACK = b'\x06\x89\x01\x00\x00\n'
         self.chatty = False
+        self.password = password
 
     def connect(self):
         self.log.debug(f'Inside connect with peer {self.peer}')
@@ -74,11 +76,30 @@ class X0IPJVC(AbstractIP):
             # improve later
             temp = self.socket.recv(20)
             self.log.debug(f'JVC Sync1 is {temp}')
-            self.socket.send(b'PJREQ')
+
+            if self.password:
+                hash = hashlib.sha256((self.password + 'JVCKWPJ').encode()).hexdigest()
+                self.log.debug(f'JVC password configured, sending auth hash {hash}')
+                req = b'PJREQ_' + hash.encode()
+            else:
+                req = b'PJREQ'
+
+            self.socket.send(req)
             temp = self.socket.recv(20)
             self.log.debug(f'JVC Sync2 is {temp}')
 
-            self.connected = True
+            if temp == b'PJACK':
+                self.connected = True
+            elif temp == b'PJNAK':
+                # projector rejected us — wrong/missing password is the usual cause
+                if self.password:
+                    self.log.error('JVC authentication failed (PJNAK) - check jvc_pj.password')
+                else:
+                    self.log.error('JVC rejected connection (PJNAK) - projector may require a password')
+                self.close()
+            else:
+                self.log.error(f'JVC handshake failed, expected PJACK but got {temp}')
+                self.close()
         except Exception as ex:
             self.log.debug(f'connect exception {ex}')
             self.close()
