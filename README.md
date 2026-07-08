@@ -6,15 +6,15 @@ Apex is a powerful tool to control your JVC projector and other devices.   Apex 
 2. Apex allows deep control of the JVC using both network connectivity and IR
 3. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP, HDFury's IP protocol and the very powerful ability to execute shell commands
 
+Keep in mind that Apex does a lot of things, but if you only want to use it to robustly control your JVC projector, it does that extremely well and other features can be ignored.
+
 # What's New?
 
 The latest release has 3 significant changes.
 
-1. Picture Mode changes have been optimized.   If there is already a picture mode change request in the Apex queue and another picture mode change is requested, only the latest will be processed.
+1. Support for newer JVC projectors requiring a SHA hash of a password
 
-2. Apex no longer holds the IP connection to the JVC projector.  This allows non-Apex IP operation to occur.  It also has the side effect of making JVC IR remote commands much more robust.
-
-3. Added ability to skip over profile operations when a picture moded change is required but not needed (already in that picture mode).  For those using custom picture mode profiles, this allows the custom operations to be skipped when the picture mode does not need changing.
+2. Small internal improvements
 
 # Using Apex Example
 
