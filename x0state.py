@@ -32,7 +32,6 @@ class X0State:
         self.chatty = False
         self.changedPJ = False
         self.onNoChangeMark = None
-        self.resendTimeout = 0
 
 
     def action(self):
@@ -188,7 +187,6 @@ class X0State:
 
                             self.state = 'waitOpACK'
                             self.timeout = time.time() + self.opAckOffset
-                            self.resendTimeout = time.time() + 2
 
 
                     else:
@@ -209,14 +207,11 @@ class X0State:
                     log.debug(f'Timeout in {self.state}.   Starting over')
                     self.state = ''
 
-
-                if time.time() > self.resendTimeout:
-                    ## try sending the opcmd
-                    log.debug('Sending opcmd again')
-                    ok = self.comm.send(self.opcmd)
-                    if not ok:
-                        log.warning(f'Send failed in {self.state}.   Consider optimisation')
-                    self.resendTimeout = time.time() + 2
+                ## try sending the opcmd
+                log.debug('Sending opcmd again')
+                ok = self.comm.send(self.opcmd)
+                if not ok:
+                    log.warning(f'Send failed in {self.state}.   Consider optimisation')
 
             else:
                 # we got something
