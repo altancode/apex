@@ -1,10 +1,14 @@
 # Apex
 
-Apex is a powerful tool to control your JVC projector and other devices.   Apex offers several features.
+Apex is a powerful tool to control your JVC projector and other devices.   Apex offers several great features.  
 
-1. Apex optimizes the JVC + HD Fury HDR experience.
-2. Apex allows deep control of the JVC using both network connectivity and IR
-3. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP, HDFury's IP protocol and the very powerful ability to execute shell commands
+Apex started life as a tool to deeply control JVC projectors with a focus on assisting with the challenges of early HDR support in JVC projectors.   While that need to gone away, Apex is still extremely useful because it allows robust control of the JVC projector.
+
+1. Apex enable reliable and robust control of the JVC projector.  JVC projectors are known for ignoring commands "when they are busy."  If you tell Apex, for example, to power off the JVC while it's "attempting to sync to a new video format", Apex will ensure the projector powers off.   Apex is the opposite of a "toss the command to the projector and hope it does it" solution.
+1. Apex allows deep control of the JVC using both network connectivity and IR.   You can tell the projector to do any command it supports.
+1. Apex allows deep control of other devices, including ones supporting Onkyo's ISCP, HDFury's IP protocol and the very powerful ability to execute shell commands
+
+In the past Apex would have also highlighted "Apex optimizes the JVC + HD Fury HDR experience."
 
 Keep in mind that Apex does a lot of things, but if you only want to use it to robustly control your JVC projector, it does that extremely well and other features can be ignored.
 
@@ -13,27 +17,11 @@ Keep in mind that Apex does a lot of things, but if you only want to use it to r
 The latest release has 3 significant changes.
 
 1. Support for newer JVC projectors requiring a SHA hash of a password
-
-2. Small internal improvements
-
-# Using Apex Example
-
-A little information about how I use Apex is documented [here](how.md).   It covers the profiles I use to control my JVC, Vertex2 and Onkyo receiver as well
-as explaining my use of 2 EDID tables.
-
-# Apex HDR Experience Optimization
-
-The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
-
-Apex optimizes this step by intelligently working with the JVC projector.  Without Apex, you must select a single default "delay" on the HDFury product.  When the HDFury product sees a content HDR transition, it waits the amount of time specified by this delay, and then sends the "macro".  A delay is often needed because the JVC stops listening to all commands when changing certain modes and this sometimes occurs when HDR content is started or ended.  The JVC may be in the "not listening" state for many seconds, perhaps up to 20.  Because of this, many people set the HDFury delay to 20 seconds.  However, this means that the user must always wait 20 seconds for the correct HDR mode to be selected, even if the JVC is ready to display content immediately or anything faster than 20 seconds.
-
-Apex works intelligently with the JVC and sends the macro command as soon as the JVC is ready to receive the command.   If the JVC is ready after 1 second, the HDR switch occurs after about 1 second.   JVC ready after 5 seconds?  The switch occurs after about 5 seconds.  If it takes a full 20 seconds, the switch will occur at that time.
-
-Apex removes the need to connect a serial cable to the JVC because Apex communicates with the JVC using Internet Protocol.  The HDFury is now connected by serial to the device running Apex.
+1. Small internal improvements
 
 # Apex Deep Control
 
-Apex allows commands from JVC's "External Control Command Communication Specification" to be performed by network commands or IR keypresses.
+Apex allows commands from JVC's "External Control Command Communication Specification" to be performed by network commands or IR keypress.
 Unlike using the projector's IR remote, or an automation solution like Harmony, Apex verifies that commands are actually performed.  With
 Apex, for example, you don't need to hard code length (40 second?) delays because the JVC is switching inputs or is powering on.   Apex will
 make sure the command is performed when the JVC is paying attention.
@@ -67,7 +55,7 @@ IR commands.
 ## Operation Targets
 
 This release of Apex allows control of devices beyond the JVC projector!  While Apex has always received data via serial
-from an HDFury Vertex 2 and controlled a JVC projector by IP, this version allows control of additional devices.   Specifially:
+from an HDFury Vertex 2 and controlled a JVC projector by IP, this version allows control of additional devices.   Specifically:
 
 1. Apex can now send commands to the HD Fury Vertex 2 (and probably other HD Fury devices) via IP
 1. Apex can now send commands to Onkyo receivers supporting ISCP (their control protocol)
@@ -94,36 +82,6 @@ As an example of using "target", the following operation changes an Onkyo receiv
 ```
 
 For backward compatibility, if the target is not specified then it assumed to tbe "pvc_pj"
-
-# Is Apex Right for Me?
-
-Apex may be right of you if...
-* You are currently using, or plan to use, a JVC RS500/600 projector with an HDFury device to enable proper HDR?   
-* Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
-* You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
-* You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
-* Your JVC does not reliably turn on or off and you'd like rock solid behavior?
-* You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
-* Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
-* You want to control Onkyo ISCP devices, HDFury Generic IP devices, or just execute arbitrary shell scripts
-
-# Example of Apex's HDR Optimization Value
-
-You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
-* Play HDR with Netflix
-  * Without Apex, when you start HDR content in Netflix, the HDR mode will not activate for about 20 seconds.
-  * With Apex, the HDR mode activates almost immediately
-
-* Play HDR with Kodi (w/frame rate matching set to "on start")
-  * Without Apex, when you start HDR content, the HDR mode will activate many seconds after the frame rate changes
-  * With Apex, the HDR mode activates almost immediately 
-
-* Stop HDR content from Kodi
-  * Without Apex, Kodi displays its menu and the color intensity is all wrong for close to 20 seconds and then changes
-  * With Apex, Kodi displays its menu and the HDR mode turns off almost immediately
-
-Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see.  The non-Apex cases assume 
-a HDFury "delay" setting of 20 seconds.
 
 # Apex Setup
 
@@ -153,6 +111,8 @@ If "password" is omitted, Apex connects exactly as before (no authentication).
 
 # HDFury Setup
 
+Note: You don't need an HDFury / Vertex2-like device to use Apex.  However, if you have one, Apex will control it!
+
 The HDFury device, such as the Vertex 2, requires the following configuration:
 
 If you don't know how the serial ports are named on the device running Apex, you can launch Apex with the flag "--showserialports" and it will output the potential serial ports
@@ -163,6 +123,8 @@ If you don't know how the serial ports are named on the device running Apex, you
 1. Don't forget to press the "Send Macro Values" button on the bottom of the screen.   This is required for the HDFury device is save the new settings.
 
 # Onkyo ISCP Command Target Setup
+
+Note: You don't need an Onkyo AVR to use Apex.   However, if you have one, Apex will control it.
 
 If you want to use Apex to control an Onkyo ISCP device, you must provide Apex with the IP address of your Onkyo device.  Under the onkyo_iscp object,
 update the ip field to contain the device's IP address.
@@ -315,6 +277,9 @@ process regardless of the JVC power state).
 ```
 
 ## "apex-ongammad" operation
+
+Note: This was never used by any anyone, including me, and will likely be removed in a future version.
+
 The apex-ongammad operation tells Apex to watch the JVC's gamma table and, should Gamma D be detected,
 perform the commands specified in a profile.   The profile is specified in the operation's data
 parameter.   "On Gamma D" detection defaults to off and is enabled by performing the apex-ongammad operation
@@ -342,7 +307,7 @@ a numeric field.   Either one can be used, the two options exist to make your li
 specified signed integer and converts it into the JVC control format.  Alternatively, you can use the "data" field.  This field allows ASCII
 data to be specified. The optional parameter "requirePowerOn" is supported.
 
-The raw operation also supports an optional "timeout" parameter.  This paramter should not be used unless there is a very specific reason.
+The raw operation also supports an optional "timeout" parameter.  This parameter should not be used unless there is a very specific reason.
 When not specified, Apex uses the default Apex algorithm to optimize the JVC's behavior.   However, if there's a unique scenario where 
 the JVC performs poorly with this default behavior, a timeout (in milliseconds) can be specified.  When the timeout is specified, Apex will stop attempting to have the JVC
 perform the specified command after the specified timeout's duration.   Keep in mind that while a short timeout may seem appropriate at first,
@@ -573,3 +538,53 @@ If you don't know how the serial ports are named on the device running Apex, you
 # Discussion?
 
 Want to discuss Apex?  Check out this [thread on AVSForum](https://www.avsforum.com/threads/apex-—-jvc-rs500-600-hdfury-hdr-macro-optimization.3177726/#post-60365429)
+
+
+# Older But Still Interesting
+
+## Using Apex Example
+
+A little information about how I use Apex is documented [here](how.md).   It covers the profiles I use to control my JVC, Vertex2 and Onkyo receiver as well
+as explaining my use of 2 EDID tables.
+
+## Apex HDR Experience Optimization
+
+The JVC RS500/RS600 projector models have the tech specs to support HDR very well (at least for projectors), but JVC provided a truly terrible HDR implementation. Amazing people on AVS have come up with ways to get HDR working on these projectors.  One part of this requires using an HDFury product, such as the Vertex 2, and connecting it via serial/RS232 to the JVC projector.  The HDFury then sends "macro" commands via RS232 which cause the JVC to select appropriate HDR (or non-HDR) picture mode. 
+
+Apex optimizes this step by intelligently working with the JVC projector.  Without Apex, you must select a single default "delay" on the HDFury product.  When the HDFury product sees a content HDR transition, it waits the amount of time specified by this delay, and then sends the "macro".  A delay is often needed because the JVC stops listening to all commands when changing certain modes and this sometimes occurs when HDR content is started or ended.  The JVC may be in the "not listening" state for many seconds, perhaps up to 20.  Because of this, many people set the HDFury delay to 20 seconds.  However, this means that the user must always wait 20 seconds for the correct HDR mode to be selected, even if the JVC is ready to display content immediately or anything faster than 20 seconds.
+
+Apex works intelligently with the JVC and sends the macro command as soon as the JVC is ready to receive the command.   If the JVC is ready after 1 second, the HDR switch occurs after about 1 second.   JVC ready after 5 seconds?  The switch occurs after about 5 seconds.  If it takes a full 20 seconds, the switch will occur at that time.
+
+Apex removes the need to connect a serial cable to the JVC because Apex communicates with the JVC using Internet Protocol.  The HDFury is now connected by serial to the device running Apex.
+
+
+# Is Apex Right for Me?
+
+Apex may be right of you if...
+* You are currently using, or plan to use, a JVC RS500/600 projector with an HDFury device to enable proper HDR?   
+* Your current HDFury macros use the JVC picture modes (USER1, USER3, NORMAL, etc.)?
+* You prefer to use IP connectivity to your JVC projector rather than running a serial/RS232 cable?
+* You are annoyed by HDR modes activating or deactivating with seemly randomly delays after starting or stopping content? 
+* Your JVC does not reliably turn on or off and you'd like rock solid behavior?
+* You are tired of hard coding 40+ second delays into your Harmony scripts in order to get the JVC to switch HDMI inputs
+* Your HTPC integration with the JVC is not cutting it and you'd like a robust solution to control the JVC 
+* You want to control Onkyo ISCP devices, HDFury Generic IP devices, or just execute arbitrary shell scripts
+
+# Example of Apex's HDR Optimization Value
+
+You use an NVIDIA Shield as a media player and use different applications such as Netflix and Kodi.  
+* Play HDR with Netflix
+  * Without Apex, when you start HDR content in Netflix, the HDR mode will not activate for about 20 seconds.
+  * With Apex, the HDR mode activates almost immediately
+
+* Play HDR with Kodi (w/frame rate matching set to "on start")
+  * Without Apex, when you start HDR content, the HDR mode will activate many seconds after the frame rate changes
+  * With Apex, the HDR mode activates almost immediately 
+
+* Stop HDR content from Kodi
+  * Without Apex, Kodi displays its menu and the color intensity is all wrong for close to 20 seconds and then changes
+  * With Apex, Kodi displays its menu and the HDR mode turns off almost immediately
+
+Note: There are lots of variables that impact the behavior described above, but the above is representative of what I see.  The non-Apex cases assume 
+a HDFury "delay" setting of 20 seconds.
+
