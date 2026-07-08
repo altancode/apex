@@ -46,7 +46,7 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
 
         timeoutConfig: dictionary that can be used to retrieve the timeout
         """
-        return timeoutConfig['hdfury_generic_ack']
+        return timeoutConfig['onkyo_iscp_ack']
 
 
     def makeCmdRetries(self, timeoutConfig):
@@ -58,6 +58,27 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
         return 40
 
 
+    # length of the fixed eISCP header (magic + header size + data size + version + reserved)
+    HEADER_LEN = 16
+    # the ISCP message unit prefix ("!" + unit type) followed by a 3-char command
+    CMD_LEN = len(b'!1') + 3
+
+    def _payload(self, packet):
+        """Strip the eISCP framing and return the bare ISCP message (e.g. b'!1PWR01').
+
+        Tolerates response terminators of [EOF], [EOF][CR] or [EOF][CR][LF] (the spec
+        allows CR, LF or CR+LF as the end character), and any CR/LF that carried over
+        from a previous packet's terminator, by locating the ISCP header rather than
+        assuming fixed leading/trailing byte counts.
+        """
+        start = packet.find(b'ISCP')
+        if start < 0:
+            return b''
+
+        # skip the fixed header, then drop the trailing EOF/CR/LF terminator
+        return packet[start + self.HEADER_LEN:].rstrip(b'\x1a\r\n')
+
+
     def isMatchingAck(self, rxData, opcmd):
         """Takes a value retrieved from the devices and converts it into a value for comparision with the target
 
@@ -67,36 +88,19 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
         the correct response
         """
 
-#target b'ISCP\x00\x00\x00\x10\x00\x00\x00\x08\x01\x00\x00\x00!1PWR' but 
+#target b'ISCP\x00\x00\x00\x10\x00\x00\x00\x08\x01\x00\x00\x00!1PWR' but
 #rxData b'ISCP\x00\x00\x00\x10\x00\x00\x00\  n\x01\x00\x00\x00!1PWR00\x1a\r\n'.
 
-        match = False
+        # compare the "!1" + 3-char command prefix, ignoring the parameter/terminator
+        gotRest = self._payload(rxData)[:self.CMD_LEN]
+        wantedRest = self._payload(opcmd)[:self.CMD_LEN]
 
-        # first drop the last 3 bytes from the rxData as this is EOL+CR+LF and we don't need to compare it
-        rxData = rxData[:-3]
+        match = bool(gotRest) and (gotRest == wantedRest)
 
-        # verify first 8 bytes match
-        # this is the ISCP and the fixed header size
-        if rxData[:8] == opcmd[:8]:
-            # they match
-            #wantedLen = int.from_bytes(opcmd[8:12],'big')
-            #gotLen = int.from_bytes(rxData[8:12],'big')
-
-            # turns out there's no need to compare the lengths
-            #log.debug(f'wantedLen {wantedLen}, gotLen {gotLen}')
-            # the rxData always has an addition LF and EOF so we subtract 2
-
-            wantedRest = opcmd[16:21]
-            gotRest = rxData[16:21]
-
-            match = (wantedRest == gotRest)
-
-            if match:
-                self.log.debug(f'Match!  wantedRest {wantedRest} gotRest {gotRest}')
-
-
-        if not match:
-            self.log.debug(f'NO MATCH on lengths')
+        if match:
+            self.log.debug(f'Match!  wantedRest {wantedRest} gotRest {gotRest}')
+        else:
+            self.log.debug(f'NO MATCH')
             self.log.debug(f'rxData {rxData}')
             self.log.debug(f'opcmd  {opcmd}')
 
@@ -106,17 +110,16 @@ class X0OnkyoReceiverCmd(x0genericcmd.X0GenericCmd):
 
     def makeCmdResult(self, rxData):
         """When a matching response is found this function will convert it into the values returned to the caller
-        
+
         rxData: the data received from the device
-        
+
         """
 
         # example
         # b'ISCP\x00\x00\x00\x10\x00\x00\x00\n\x01\x00\x00\x00!1PWR01\x1a\r\n
-        # all the beginning is fixed
-        # we remove the last 3 because it's an EOF CR and LF
+        # strip the framing, then drop the "!1PWR" command prefix to leave the parameter
 
-        result = rxData[21:-3]
+        result = self._payload(rxData)[self.CMD_LEN:]
         self.log.debug(f'makeCmdResult returning "{result}"')
         return result
 
@@ -128,7 +131,9 @@ def getDetails():
         'config_ip': 'ip',
         'config_port': 'port',
         'config_timeout_ack': 'onkyo_iscp_ack',
-        'delimiter': b'\x1a\r\n'
+        # every ISCP data unit ends with [EOF] (0x1a); the optional trailing CR/LF is
+        # handled by _payload, so we frame on the one guaranteed terminator byte
+        'delimiter': b'\x1a'
     }
 
     return details

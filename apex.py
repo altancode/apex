@@ -137,7 +137,7 @@ def singleProfile2cmd(pname, profiles, cmdTargets, log, cfg, stateHDR):
                         log.error(f'Cannot convert data to binary {data} {ex}')
 
                     if b != None:
-                        obj = cmdTarget['cmdobj'](cmdTarget['conn'], log, cfg['timeouts'])
+                        obj = cmdTarget['cmdobj'](cmdTarget['conn'], log, updatedTimeouts)
 #                        obj = x0genericcmd.X0OnkyoReceiverCmd(onkyoip, log, cfg['timeouts'])
                         localQueue.append(ApexTaskEntry(obj,(cmd,b), 'user', convertPowerReq(op, True), localGroup))
                 else:
